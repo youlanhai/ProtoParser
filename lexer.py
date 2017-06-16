@@ -116,8 +116,9 @@ class Lexer(object):
 			if ch == '\n' or ch is None:
 				self.error('invalid string')
 
-			s += ch
-			ret.append(self.getchar())
+			ret.append(ch)
+			ch = self.getchar()
+
 		return "".join(ret)
 
 	def next(self):
