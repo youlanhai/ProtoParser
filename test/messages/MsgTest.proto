@@ -1,6 +1,7 @@
 
-//@[up, 1001, setPosition]
-//@[down, 1002, onSetPosition]
+//@[up, 1001, sendPosition]
+//@[dn, 1002, broadcastPosition, send=sendToOthers]
+//@[dn, 1003, teleportTo, send=sendToAll]
 message Vector3
 {
     required float x = 1;
@@ -8,7 +9,7 @@ message Vector3
     required float z = 3;
 }
 
-//@[up, 1003, setRotation, expand=false]
+//@[up, 1010, setRotation, expand=false]
 message Vector4
 {
     required float x = 1;

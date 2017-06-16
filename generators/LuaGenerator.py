@@ -1,11 +1,44 @@
 # -*- coding: utf-8 -*-
 import os
 from generator import Generator
+from Cheetah.Template import Template
+
+# args:  fields, method, moduleName, className, send, cmd
+TPL_EXPAND_METHOD = """
+#set argText = "network"
+#if len($fields) > 0
+#set argText = $argText + ", " + ", ".join($fields)
+#end if
+local function ${method}($argText)
+	local proto = $moduleName.${className}()
+#for field in $fields
+	proto.$field = $field
+#end for
+	network:${send}($cmd, proto)
+end
+"""
+
+TPL_COLLAPSED_METHOD = """
+local function ${method}(network, proto)
+	network:${send}($cmd, proto)
+end
+"""
+
+# args: functions
+TPL_RETURN = """
+return {
+#for fun in $functions
+	$fun,
+#end for
+}
+"""
+
 
 class LuaGenerator(Generator):
 
-	def __init__(self):
+	def __init__(self, mode = "up"):
 		super(LuaGenerator, self).__init__()
+		self.mode = mode
 
 	def generate(self, inputFile, outputFile, fileDesc):
 		self.inputFile = inputFile
@@ -26,11 +59,7 @@ class LuaGenerator(Generator):
 		self.writeFileHeader()
 		self.writeNewLine()
 
-		indent = 0
 		for clsDesc in fileDesc.codes:
-			if len(clsDesc.attributes) == 0:
-				continue
-
 			self.writeClassCodes(indent, clsDesc)
 
 	def writeFileHeader(self):
@@ -39,55 +68,27 @@ class LuaGenerator(Generator):
 
 	def writeClassCodes(self, indent, clsDesc):
 		for attr in clsDesc.attributes:
-			if attr["mode"] != "up": continue
+			if attr["mode"] != self.mode: continue
 
-			if attr.get("expand", True):
-				self.writeExpandMethod(indent, attr, clsDesc)
-			else:
-				self.writeCollapsedMethod(indent, attr, clsDesc)
+			self.writeMethod(indent, attr, clsDesc)
 			self.writeNewLine()
 
 			self.functions.append(attr["method"])
 
-	def writeExpandMethod(self, indent, attr, clsDesc):
-		cmd = attr["cmd"]
-		method = attr["method"]
+	def writeMethod(self, indent, attr, clsDesc):
+		namespace = {
+			"fields" : [member.name for member in clsDesc.members],
+			"moduleName" : self.moduleName,
+			"className" : clsDesc.name,
+			"send" 		: attr.get("send", "send"),
+			"cmd" 		: attr["cmd"],
+			"method" 	: attr["method"],
+		}
 
-		args = [member.name for member in clsDesc.members]
-
-		argText = "network"
-		if len(args) > 0:
-			argText += ", "
-			argText += ", ".join(args)
-
-		self.writeLine(indent, "local function %s(%s)" % (method, argText))
-		indent += 1
-
-		key = "proto"
-		self.writeLine(indent, "%s = %s.%s()" % (key, self.moduleName, clsDesc.name))
-		for arg in args:
-			self.writeLine(indent, "%s.%s = %s" % (key, arg, arg))
-
-		self.writeNewLine()
-		self.writeLine(indent, "network:send(%d, %s)" % (cmd, key))
-
-		indent -= 1
-		self.writeLine(indent, "end")
-
-	def writeCollapsedMethod(self, indent, attr, clsDesc):
-		cmd = attr["cmd"]
-		method = attr["method"]
-
-		self.writeLine(indent, "local function %s(network, proto)" % method)
-		indent += 1
-		self.writeLine(indent, "network:send(%d, proto)" % cmd)
-		indent -= 1
-		self.writeLine(indent, "end")
+		text = TPL_EXPAND_METHOD if attr.get("expand", True) else TPL_COLLAPSED_METHOD
+		tpl = Template(text, searchList = [namespace])
+		self.stream.write(str(tpl))
 
 	def writeReturn(self, indent, functions):
-		self.writeLine(indent, "return {")
-		indent += 1
-		for fun in functions:
-			self.writeLine(indent, fun, ",")
-		indent -= 1
-		self.writeLine(indent, "}")
+		tpl = Template(TPL_RETURN, searchList = [{"functions" : functions}])
+		self.stream.write(str(tpl))

@@ -22,7 +22,8 @@ def convert(name, srcPath, dstPath, module):
 	from generators.LuaGenerator import LuaGenerator
 	from generators.ListGenerator import ListGenerator
 
-	LuaGenerator().generate(name, dstPath, pa.fd)
+	LuaGenerator().generate(name, dstPath + "_up", pa.fd)
+	LuaGenerator("dn").generate(name, dstPath + "_dn", pa.fd)
 	ListGenerator().generate(name, dstPath, pa.fd)
 	return True
 
