@@ -58,19 +58,19 @@ class Lexer(object):
 		super(Lexer, self).__init__()
 		self.content = content
 		self.index = 0
-		self.symbols = []
 		self.line = 1
 		self.column = 1
-		self.isError = False
 		self.lastValue = None
 
 	def getchar(self):
-		if self.index >= len(self.content): return None
-
-		ch = self.content[self.index]
-		self.column += 1
+		index = self.index
 		self.index += 1
 
+		if index >= len(self.content):
+			return None
+
+		ch = self.content[index]
+		self.column += 1
 		return ch
 
 	def ungetchar(self):
@@ -83,41 +83,42 @@ class Lexer(object):
 		self.column = 1
 
 	def readIdentity(self):
-		s = ''
-		while True:
+		ret = []
+
+		ch = self.getchar()
+		while ch is not None and ch in VAR_NAME_LETTER:
+			ret.append(ch)
 			ch = self.getchar()
-			if ch is None:
-				break
 
-			if ch not in VAR_NAME_LETTER:
-				self.ungetchar()
-				break
-			s += ch
-
+		self.ungetchar()
+		s = "".join(ret)
 		if VAR_NAME_PATTERN.match(s):
 			return s
-		else:
-			self.column -= len(s)
-			return self.error('invalid identity name "%s"' % s)
+		
+		self.column -= len(s)
+		self.error('invalid identity name "%s"' % s)
 
 	def readComment(self):
 		ret = []
-		while True:
-			ch = self.getchar()
-			if ch == '\n' or ch is None:
-				break
+
+		ch = self.getchar()
+		while ch != '\n' and ch is not None:
 			ret.append(ch)
+			ch = self.getchar()
+
 		self.enterNextLine()
 		return "".join(ret)
 
 	def readString(self):
-		s = ''
-		while True:
-			ch = self.getchar()
-			if ch == '\n' or ch is None: return self.error('invalid string')
-			if ch == '"': break
+		ret = []
+		ch = self.getchar()
+		while ch != '"':
+			if ch == '\n' or ch is None:
+				self.error('invalid string')
+
 			s += ch
-		return s
+			ret.append(self.getchar())
+		return "".join(ret)
 
 	def next(self):
 		self.lastValue = None
@@ -191,14 +192,15 @@ class Lexer(object):
 					return KEYWORDS.get(value, T_IDENTITY)
 
 			else:
-				self.error("invalid symbols '%s'" % ch)
+				self.error("invalid symbol '%s'" % ch)
 				break
 
 		return None
 
 	def error(self, msg):
 		self.isError = True
-		print "error: line=%d, column=%d, %s" % (self.line, self.column, msg)
+		msg = "error: line=%d, column=%d, %s" % (self.line, self.column, msg)
+		raise RuntimeError, msg
 
 	def readNumber(self):
 		ret = []
@@ -235,6 +237,5 @@ class Lexer(object):
 		self.ungetchar()
 
 		value = "".join(ret)
-		# print "readNumber", value
 		return eval(value)
 
