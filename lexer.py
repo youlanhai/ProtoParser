@@ -17,6 +17,7 @@ T_REPEATED = 264
 T_PACKAGE = 265
 T_ATTRIBUTE = 266
 T_NUMBER = 267
+T_BOOLEAN = 268
 
 KEYWORDS = {
 	"message" 	: T_STRUCT,
@@ -43,6 +44,7 @@ TOKEN_2_NAME = {
 	T_PACKAGE 	: "package",
 	T_ATTRIBUTE : "attribute",
 	T_NUMBER 	: "number",
+	T_BOOLEAN 	: "boolean",
 }
 
 def token2str(tk):
@@ -171,12 +173,22 @@ class Lexer(object):
 
 			elif ch in VAR_NAME_LETTER:
 				self.ungetchar()
-				self.lastValue = self.readIdentity()
+				value = self.readIdentity()
 
-				if self.lastValue is None:
+				if value == "true":
+					self.lastValue = True
+					return T_BOOLEAN
+
+				elif value == "false":
+					self.lastValue = False
+					return T_BOOLEAN
+
+				if value is None:
 					break
+					
 				else:
-					return KEYWORDS.get(self.lastValue, T_IDENTITY)
+					self.lastValue = value
+					return KEYWORDS.get(value, T_IDENTITY)
 
 			else:
 				self.error("invalid symbols '%s'" % ch)

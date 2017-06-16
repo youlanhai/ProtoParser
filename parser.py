@@ -6,7 +6,7 @@ import os
 
 from lexer import token2str
 
-VALID_ATTRIBUTE_TOKENS = (lexer.T_IDENTITY, lexer.T_STRING, lexer.T_NUMBER)
+VALID_ATTRIBUTE_TOKENS = (lexer.T_IDENTITY, lexer.T_STRING, lexer.T_NUMBER, lexer.T_BOOLEAN)
 
 # 语法分析器
 class Parser(object):
@@ -71,7 +71,7 @@ class Parser(object):
 	def parseStruct(self):
 		desc = "message"
 
-		attributes = self.lastAttributes
+		attributes = [attr.attributes for attr in self.lastAttributes]
 		self.lastAttributes = []
 
 		if not self.matchNext(lexer.T_IDENTITY, desc):
@@ -83,6 +83,7 @@ class Parser(object):
 			return False
 
 		cls = codes.ClassDescriptor(name, "message")
+		cls.setAttributes(attributes)
 		self.fd.addCode(cls)
 
 		if not self.matchNext('{', desc):
@@ -208,7 +209,7 @@ class Parser(object):
 		msg = "error: line=%d, column=%d, %s" % (self.lexer.line, self.lexer.column, msg)
 		raise RuntimeError, msg
 
-	#属性 [v1, v2, v3, tag=value, ...]
+	#属性 [mode, cmd, method, tag=value, ...]
 	def parseAttribute(self):
 		desc = "attribute"
 		attr = codes.Attribute()

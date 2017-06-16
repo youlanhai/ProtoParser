@@ -24,10 +24,15 @@ class ClassDescriptor(object):
 		self.name = name
 		self.type = type
 		self.members = []
+		self.attributes = []
 
 	def addMember(self, varOrder, varQualifier, varName, varType, varTemplateArgs):
 		member = Member(varOrder, varQualifier, varName, varType, varTemplateArgs)
 		self.members.append(member)
+
+	def setAttributes(self, attributes):
+		self.attributes = attributes
+
 
 class FileDescriptor(object):
 	def __init__(self, fileName):

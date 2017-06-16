@@ -20,7 +20,11 @@ def convert(name, srcPath, dstPath, module):
 			return False
 		fd = pa.fd
 
-	
+	from generators.LuaGenerator import LuaGenerator
+	from generators.ListGenerator import ListGenerator
+
+	LuaGenerator().generate(name, dstPath, pa.fd)
+	ListGenerator().generate(name, dstPath, pa.fd)
 	return True
 
 def main():

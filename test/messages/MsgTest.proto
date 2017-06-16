@@ -1,5 +1,5 @@
 
-//@[up, 1001, setPosition, expand=false]
+//@[up, 1001, setPosition]
 //@[down, 1002, onSetPosition]
 message Vector3
 {
@@ -8,6 +8,7 @@ message Vector3
     required float z = 3;
 }
 
+//@[up, 1003, setRotation, expand=false]
 message Vector4
 {
     required float x = 1;
