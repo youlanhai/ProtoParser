@@ -16,8 +16,7 @@ def convert(name, srcPath, dstPath, module):
 	fd = module.files.get(srcPath)
 	if fd is None:
 		pa = Parser(module, srcPath)
-		if not pa.parse():
-			return False
+		pa.parse()
 		fd = pa.fd
 
 	from generators.LuaGenerator import LuaGenerator

@@ -7,7 +7,7 @@ import re
 T_NONE = 0
 
 T_IDENTITY = 257
-T_STRUCT = 258
+T_MESSAGE = 258
 T_ENUM = 259
 T_STRING = 260
 T_IMPORT = 261
@@ -20,7 +20,7 @@ T_NUMBER = 267
 T_BOOLEAN = 268
 
 KEYWORDS = {
-	"message" 	: T_STRUCT,
+	"message" 	: T_MESSAGE,
 	"enum" 		: T_ENUM,
 	"import" 	: T_IMPORT,
 	"required" 	: T_REQUIRED,
@@ -34,7 +34,7 @@ VAR_NAME_PATTERN = re.compile(r"^[_a-zA-Z]\w*$")
 
 TOKEN_2_NAME = {
 	T_IDENTITY 	: "identity",
-	T_STRUCT 	: "message",
+	T_MESSAGE 	: "message",
 	T_ENUM 		: "enum",
 	T_STRING 	: "string",
 	T_IMPORT 	: "import",
@@ -185,7 +185,7 @@ class Lexer(object):
 
 				if value is None:
 					break
-					
+
 				else:
 					self.lastValue = value
 					return KEYWORDS.get(value, T_IDENTITY)
