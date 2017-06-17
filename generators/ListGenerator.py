@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
 import os
+from Cheetah.Template import Template
 from generator import Generator
+import templates
 
 class ListGenerator(Generator):
+
+	def __init__(self, template = "LuaList"):
+		super(ListGenerator, self).__init__()
+		self.template = getattr(templates, template)
 
 	def generate(self, inputFile, outputFile, fileDesc):
 		self.inputFile = inputFile
 		self.moduleName = os.path.splitext(os.path.basename(inputFile))[0]
 		self.fileDesc = fileDesc
 
-		with open(outputFile + ".json", "wb") as f:
+		with open(outputFile, "wb") as f:
 			self.stream = f
 
-			self.writeMessageList(0, self.collectMessages(fileDesc))
+			self.writeMessageList(self.collectMessages(fileDesc))
 
 	def collectMessages(self, fileDesc):
 		ret = []
@@ -26,15 +32,10 @@ class ListGenerator(Generator):
 
 		return ret
 
-	def writeMessageList(self, indent, messages):
-		self.writeLine(indent, "[")
-		indent += 1
-		for i, message in enumerate(messages):
-			text = """[%d, "%s", "%s"]""" % message
-			if i + 1 == len(messages):
-				self.writeLine(indent, text)
-			else:
-				self.writeLine(indent, text, ",")
-		indent -= 1
-		self.writeLine(indent, "]")
+	def writeMessageList(self, messages):
+		namespace = {"messages" : messages}
+		
+		fmt = self.template.LIST
+		tpl = Template(fmt, searchList = [namespace, self])
+		self.stream.write(str(tpl))
 
