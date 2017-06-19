@@ -18,6 +18,9 @@ message Vector4
     required float w = 4;
 }
 
+/* 
+同步位置和旋转 
+*/
 message SyncTransform
 {
     required Vector3 position = 1;

@@ -98,7 +98,33 @@ class Lexer(object):
 		self.column -= len(s)
 		self.error('invalid identity name "%s"' % s)
 
-	def readComment(self):
+	def readBlockComment(self):
+		ret = []
+
+		while True:
+			ch = self.getchar()
+			if ch is None:
+				self.error('unclosed comment')
+
+			if ch == '*':
+				chNext = self.getchar()
+				if chNext is None:
+					self.error("unclosed comment")
+				elif chNext == '/': # `*/`
+					break # 唯一结束条件
+				else:
+					ret.append(ch)
+					ret.append(chNext)
+			else:
+				if ch == '\n':
+					self.enterNextLine()
+
+				ret.append(ch)
+
+		return "".join(ret)
+
+
+	def readLineComment(self):
 		ret = []
 
 		ch = self.getchar()
@@ -137,17 +163,19 @@ class Lexer(object):
 
 			elif ch == '/':
 				ch = self.getchar()
-				if ch != '/': # `//`
-					self.error("invalid comment")
-					break
+				if ch == '*': # `/* */`
+					print self.readBlockComment()
 
-				ch = self.getchar()
-				if ch == '@': # `//@`
-					return T_ATTRIBUTE
+				elif ch == '/': # `//`
+					ch = self.getchar()
+					if ch == '@': # `//@`
+						return T_ATTRIBUTE
 
+					else:
+						self.ungetchar()
+						self.readLineComment()
 				else:
-					self.ungetchar()
-					self.readComment()
+					self.error("invalid symbol '%s'" % ch)
 
 			elif ch == '"':
 				self.lastValue = self.readString()
