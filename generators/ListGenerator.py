@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from Cheetah.Template import Template
-from generator import Generator
+from Generator import Generator
 import templates
 
 class ListGenerator(Generator):

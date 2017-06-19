@@ -164,7 +164,7 @@ class Lexer(object):
 			elif ch == '/':
 				ch = self.getchar()
 				if ch == '*': # `/* */`
-					print self.readBlockComment()
+					self.readBlockComment()
 
 				elif ch == '/': # `//`
 					ch = self.getchar()
