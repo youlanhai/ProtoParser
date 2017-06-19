@@ -26,3 +26,6 @@ message SyncTransform
     required Vector3 position = 1;
     required Vector4 rotation = 2;
 }
+
+message Login
+{}
