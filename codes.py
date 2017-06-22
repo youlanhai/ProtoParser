@@ -6,8 +6,7 @@ class Member(object):
 	def __init__(self, index, qualifier, name, type, template):
 		super(Member, self).__init__()
 		self.index = index
-		self.camelName = name
-		self.name = name.lower()
+		self.name = name
 		self.type = type
 		self.template = template
 		self.qualifier = qualifier

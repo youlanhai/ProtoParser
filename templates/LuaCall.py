@@ -3,6 +3,7 @@
 HEADER = """--
 -- this file is auto generate by ProtoParser tool.
 -- from $inputFile
+local $moduleName = loadprotobuf "$moduleName"
 """
 
 # args:  fields, method, moduleName, className, send, cmd
@@ -30,7 +31,7 @@ end
 RETURN = """
 return {
 #for cmd, fun in $functions
-	$fun,
+	$fun = $fun,
 #end for
 }
 """

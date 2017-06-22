@@ -3,23 +3,26 @@
 HEADER = """--
 -- this file is auto generate by ProtoParser tool.
 -- from $inputFile
+local $moduleName = loadprotobuf "$moduleName"
 """
 
 EXPAND_METHOD = """
-local function ${method}(network, data)
+local function ${method}(data)
 	local proto = $moduleName.${className}()
 	proto:Parse(data)
+
 	#set values = ["proto." + v for v in $fields]
 	#set argText = ", ".join($values)
-	network:oncall_${method}($argText)
+	return "${method}", proto, {$argText}
 end
 """
 
 COLLAPSED_METHOD = """
-local function ${method}(network, data)
+local function ${method}(data)
 	local proto = $moduleName.${className}()
 	proto:Parse(data)
-	network:oncall_${method}(proto)
+
+	return "${method}", proto, {}
 end
 """
 

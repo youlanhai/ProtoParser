@@ -59,7 +59,7 @@ class NormalGenerator(Generator):
 			"fields" : [member.name for member in clsDesc.members],
 			"moduleName" : self.moduleName,
 			"className" : clsDesc.name,
-			"send" 		: attr.get("send", "send"),
+			"send" 		: attr.get("send", "sendProto"),
 			"cmd" 		: attr["cmd"],
 			"method" 	: attr["method"],
 		}
