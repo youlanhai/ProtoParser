@@ -7,8 +7,8 @@ import codes
 from parser import Parser
 
 MODULE_PATH = os.path.abspath(os.path.dirname(__file__))
-OUTPUT_PATH = os.path.join(MODULE_PATH, "../client-code/scripts/network/protofunc")
-INPUT_PATH = os.path.join(MODULE_PATH, "../client-code/protos")
+OUTPUT_PATH = os.path.join(MODULE_PATH, "../scripts/network/protofunc")
+INPUT_PATH = os.path.join(MODULE_PATH, "../protos")
 
 USAGE = "python do.py [input_path] [output_path]"
 
