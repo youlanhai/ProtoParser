@@ -125,19 +125,20 @@ class Parser(object):
 			if os.path.isfile(fullPath):
 				self.loadIncludeFile(fname, fullPath)
 
-		self.error(desc, "the file '%s' was not found" % fname)
+		return
 
 	def loadIncludeFile(self, name, fullPath):
 		fd = self.module.files.get(fullPath)
-		if fd is not None:
+		if fd:
 			if not self.fd.addInclude(fd):
 				self.error("import", "loop include '%s'" % name)
-		
-		pa = Parser(self.module, fullPath)
-		if not self.fd.addInclude(pa.fd):
-			self.error("import", "loop include '%s'" % name)
+		else:
+			pa = Parser(self.module, fullPath)
+			if not self.fd.addInclude(pa.fd):
+				self.error("import", "loop include '%s'" % name)
 
-		pa.parse()
+			pa.parse()
+		return
 
 	def _parseTemplateArgs(self, desc):
 		ret = []
