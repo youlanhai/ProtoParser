@@ -80,7 +80,7 @@ class Parser(object):
 				self.error(desc, "invalid token %s" % token2str(token))
 
 			varQualifier = token2str(token)
-			
+
 			self.matchNext(lexer.T_IDENTITY, desc)
 			varType = self.lexer.lastValue
 
@@ -92,7 +92,9 @@ class Parser(object):
 				varTemplateArgs = self._parseTemplateArgs(desc)
 				token = self.lexer.next()
 
-			self.matchToken(token, lexer.T_IDENTITY, desc)
+			# self.matchToken(token, lexer.T_IDENTITY, desc)
+			if not lexer.is_valid_identity(token):
+				self.error(desc, "invalid token %s" % token2str(token))
 			varName = self.lexer.lastValue
 
 			self.matchNext('=', desc)

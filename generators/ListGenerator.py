@@ -26,9 +26,10 @@ class ListGenerator(Generator):
 		for clsDesc in fileDesc.codes:
 			protoName = "%s.%s" % (self.moduleName, clsDesc.name)
 			for attr in clsDesc.attributes:
+				mode = attr["mode"]
 				cmd = attr["cmd"]
 				method = attr["method"]
-				ret.append((cmd, method, protoName))
+				ret.append((cmd, mode, method, protoName))
 
 		return ret
 

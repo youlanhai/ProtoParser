@@ -29,6 +29,8 @@ KEYWORDS = {
 	"package" 	: T_PACKAGE,
 }
 
+KEYWORD_TOKENS = set([tk for tk in KEYWORDS.itervalues()])
+
 VAR_NAME_LETTER = string.letters + string.digits + '_'
 VAR_NAME_PATTERN = re.compile(r"^[_a-zA-Z]\w*$")
 
@@ -51,6 +53,13 @@ def token2str(tk):
 	if type(tk) == str:
 		return tk
 	return TOKEN_2_NAME[tk]
+
+def is_keyword_token(tk):
+	return tk in KEYWORD_TOKENS
+
+# 判断
+def is_valid_identity(tk):
+	return tk == T_IDENTITY or tk in KEYWORD_TOKENS
 
 # 词法分析器
 class Lexer(object):

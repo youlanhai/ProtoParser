@@ -2,8 +2,8 @@
 
 LIST = """
 return {
-#for cmd, method, protoName in $messages
-	{$cmd, "$method", "$protoName"},
+#for cmd, mode, method, protoName in $messages
+	{$cmd, "$mode", "$method", "$protoName"},
 #end for
 }
 """

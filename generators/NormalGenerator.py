@@ -73,7 +73,7 @@ class NormalGenerator(Generator):
 		else:
 			fmt = self.template.COLLAPSED_METHOD
 
-		tpl = Template(fmt, searchList = [namespace, self])
+		tpl = Template(fmt, searchList = [namespace, self, self.template])
 		self.stream.write(str(tpl))
 
 

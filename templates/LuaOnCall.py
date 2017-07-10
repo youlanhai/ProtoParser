@@ -6,23 +6,30 @@ HEADER = """--
 local $moduleName = loadprotobuf "$moduleName"
 """
 
+def genOnName(name):
+	if name.startswith("on"):
+		return name
+	return "on" + name[0].upper() + name[1:]
+
 EXPAND_METHOD = """
-local function ${method}(data)
+#set onName = $genOnName($method)
+local function ${onName}(data)
 	local proto = $moduleName.${className}()
 	proto:Parse(data)
 
 	#set values = ["proto." + v for v in $fields]
 	#set argText = ", ".join($values)
-	return "${method}", proto, {$argText}
+	return "${onName}", proto, {$argText}
 end
 """
 
 COLLAPSED_METHOD = """
-local function ${method}(data)
+#set onName = $genOnName($method)
+local function ${onName}(data)
 	local proto = $moduleName.${className}()
 	proto:Parse(data)
 
-	return "${method}", proto, {}
+	return "${onName}", proto, {}
 end
 """
 
