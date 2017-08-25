@@ -1,0 +1,26 @@
+
+//@[up, sendPosition]
+//@[dn, broadcastPosition, send=sendToOthers]
+//@[dn, teleportTo, send=sendToAll]
+message Vector3
+{
+    required float x = 1;
+    required float y = 2;
+    required float z = 3;
+}
+
+//@[up, 1000, setRotation, expand=false]
+message Vector4
+{
+    required float x = 1;
+    required float y = 2;
+    required float z = 3;
+    required float w = 4;
+}
+
+//@[up, 1001, login]
+message LoginProtobuf
+{
+    required string userName = 1;
+    required string password = 2;
+}

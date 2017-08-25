@@ -25,17 +25,29 @@ message LoginProtobuf
 }
 ```
 
-转换成RPC函数为：
-```python
-# 客户端登录上行协议
-def login(userName, password):
-    proto = LoginProtobuf()
+转换成RPC函数大致为：
+```lua
+-- 客户端登录上行协议
+local function login(network, userName, password)
+    local proto = MsgTest.LoginProtobuf()
     proto.userName = userName
     proto.password = password
-    network.send(1001, proto:SerializeToBytes())
+    network:sendProto(1001, proto)
+end
 
-# 服务器收到消息
-def onCallLogin(userName, password):
-    pass # do somthing
+-- 服务器收到消息。搜索自己的onLogin函数，然后去调用
+local function onLogin(data)
+    local proto = common.LoginProtobuf()
+    proto:Parse(data)
+
+    return "onLogin", proto, {proto.userName, proto.password}
+end
 ```
 
+# 用法
+```sh
+python do.py test/messages -output test/output
+```
+
+# 代码模板
+位于`templates`目录下。目前仅写了lua语言的生成模板，可以自己扩展，注册到templates模块中。

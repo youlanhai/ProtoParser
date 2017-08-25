@@ -6,8 +6,9 @@ NEW_LINE = "\n"
 # 代码生成器基类
 class Generator(object):
 
-	def __init__(self):
+	def __init__(self, generatorInfo):
 		super(Generator, self).__init__()
+		self.generatorInfo = generatorInfo
 		self.stream = None
 
 	def write(self, indent, *args):

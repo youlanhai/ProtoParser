@@ -6,17 +6,21 @@ from Generator import Generator
 import templates
 
 
-# 代码生成器基类
 class NormalGenerator(Generator):
+	''' 通用代码生成器
+	'''
 
-	#@param mode 	上下行模式。与message属性中的上下行模式一致。
-	# 只有模式相同的属性，才会生成代码。因此，可以把mode看做是个生成代码的过滤器。
-	#@param template 模板数据，描述了如何生成代码。template是templates目录下模块文件的名称。
-	def __init__(self, mode = "up", template = "LuaCall"):
-		super(Generator, self).__init__()
-		self.stream = None
-		self.mode = mode
-		self.template = getattr(templates, template)
+	def __init__(self, generatorInfo):
+		''' 生成器信息需要包含以下参数：
+			mode 	上下行模式。与message属性中的上下行模式一致。只有模式相同的属性，才会生成代码。因此，可以把mode看做是个生成代码的过滤器。
+			template 模板数据，描述了如何生成代码。template是templates目录下模块文件的名称。
+		'''
+
+		super(NormalGenerator, self).__init__(generatorInfo)
+
+		self.mode = generatorInfo["mode"]
+		tplName = generatorInfo["template"]
+		self.template = getattr(templates, tplName)
 
 	def generate(self, inputFile, outputFile, fileDesc):
 		self.inputFile = inputFile

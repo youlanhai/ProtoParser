@@ -5,10 +5,13 @@ from Generator import Generator
 import templates
 
 class ListGenerator(Generator):
+	''' 消息文件列表生成器。用于调试目的
+	'''
 
-	def __init__(self, template = "LuaList"):
-		super(ListGenerator, self).__init__()
-		self.template = getattr(templates, template)
+	def __init__(self, generatorInfo):
+		super(ListGenerator, self).__init__(generatorInfo)
+		tplName = generatorInfo["template"]
+		self.template = getattr(templates, tplName)
 
 	def generate(self, inputFile, outputFile, fileDesc):
 		self.inputFile = inputFile

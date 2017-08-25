@@ -9,11 +9,11 @@ from lexer import token2str
 VALID_ATTRIBUTE_TOKENS = (lexer.T_IDENTITY, lexer.T_STRING, lexer.T_NUMBER, lexer.T_BOOLEAN)
 VALID_QUALIFIER_TOKENS = (lexer.T_REQUIRED, lexer.T_OPTIONAL, lexer.T_REPEATED)
 
-class Parser(object):
+class PParser(object):
 	''' 语法分析器
 	'''
 	def __init__(self, module, fileName):
-		super(Parser, self).__init__()
+		super(PParser, self).__init__()
 		self.module = module
 		self.fd = self.module.newFileDescriptor(fileName)
 		self.lexer = None
@@ -134,7 +134,7 @@ class Parser(object):
 			if not self.fd.addInclude(fd):
 				self.error("import", "loop include '%s'" % name)
 		else:
-			pa = Parser(self.module, fullPath)
+			pa = PParser(self.module, fullPath)
 			if not self.fd.addInclude(pa.fd):
 				self.error("import", "loop include '%s'" % name)
 

@@ -1,46 +1,84 @@
 #-*- coding: utf-8 -*-
-
-import sys
 import os
 import shutil
+import imp
+
+try:
+	from Cheetah.Template import Template
+except:
+	"Python module 'Cheetah' was required. use command `pip install Cheetah` to install it."
+	exit()
+
 import codes
-from parser import Parser
+import ppconfig
+import generators
+from PParser import PParser
+from argparse import ArgumentParser
 
 MODULE_PATH = os.path.abspath(os.path.dirname(__file__))
 OUTPUT_PATH = os.path.join(MODULE_PATH, "../scripts/network/protofunc")
 INPUT_PATH = os.path.join(MODULE_PATH, "../protos")
 
-USAGE = "python do.py [input_path] [output_path]"
-
-def convert(name, srcPath, dstPath, module):
+def convert(name, srcPath, outputPath, module):
 	fileDesc = module.files.get(srcPath)
 	if fileDesc is None:
-		pa = Parser(module, srcPath)
+		pa = PParser(module, srcPath)
 		pa.parse()
 		fileDesc = pa.fd
 
-	from generators.NormalGenerator import NormalGenerator
-	from generators.ListGenerator import ListGenerator
+	namespace = {
+		"NAME" : name,
+		"SOURCE_FILE" : srcPath,
+		"OUTPUT_PATH" : outputPath,
+	}
 
-	NormalGenerator("up").generate(name, dstPath + "_up.lua", fileDesc)
-	NormalGenerator("dn").generate(name, dstPath + "_dn.lua", fileDesc)
-	NormalGenerator("up", "LuaOnCall").generate(name, dstPath + "_up_on.lua", fileDesc)
-	NormalGenerator("dn", "LuaOnCall").generate(name, dstPath + "_dn_on.lua", fileDesc)
+	for generatorInfo in ppconfig.CODE_GENERATORS:
+		cls = getattr(generators, generatorInfo["class"])
+		generator = cls(generatorInfo)
 
-	ListGenerator().generate(name, dstPath + "_list.lua", fileDesc)
+		tpl = Template(generatorInfo["output"], searchList = [namespace, ])
+		dstPath = str(tpl)
+		generator.generate(name, dstPath, fileDesc)
+
 	return True
 
-def main():
-	outputPath = OUTPUT_PATH
-	inputPath = INPUT_PATH
+def parse_config(path):
+	path = os.path.abspath(path)
+	print "load configure file", path
 
-	if len(sys.argv) > 1: inputPath = sys.argv[1]
-	if len(sys.argv) > 2: outputPath = sys.argv[2]
+	if not os.path.exists(path):
+		raise RuntimeError, "the configure file '%s' doesn't exist" % path
+
+	cfg = imp.load_source("custom_configure", path)
+	for k, v in cfg.__dict__.iteritems():
+		if k.startswith('_'): continue
+
+		setattr(ppconfig, k, v)
+
+	ppconfig.custom_init()
+	return
+
+def main():
+	parser = ArgumentParser(description="Protobuf Parser")
+	parser.add_argument("-output", help="output directory. default is 'output', under current path")
+	parser.add_argument("-f", "--force", action="store_true", help="this will remove all old files.")
+	parser.add_argument("-config", help="the configure file for code generator. see ppconfig.py")
+	parser.add_argument("input_path", help="input proto directory. only *.proto files will be processed.")
+
+	option = parser.parse_args()
+
+	if option.config:
+		parse_config(option.config)
+
+	inputPath = option.input_path
+	outputPath = option.output if option.output else "output"
 
 	if os.path.exists(outputPath):
-		shutil.rmtree(outputPath)
-
-	os.mkdir(outputPath)
+		if option.force:
+			shutil.rmtree(outputPath)
+			os.mkdir(outputPath)
+	else:
+		os.mkdir(outputPath)
 
 	module = codes.Module()
 	module.searchPath = [inputPath]
@@ -50,10 +88,9 @@ def main():
 		name, ext = os.path.splitext(fname)
 		if ext != ".proto": continue
 
-		srcPath = os.path.join(inputPath, fname)
-		dstPath = os.path.join(outputPath, name)
 		print "generate:", fname
-		convert(fname, srcPath, dstPath, module)
+		srcFullPath = os.path.join(inputPath, fname)
+		convert(name, srcFullPath, outputPath, module)
 
 if __name__ == "__main__":
 	main()
