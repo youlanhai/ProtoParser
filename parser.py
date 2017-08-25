@@ -9,8 +9,9 @@ from lexer import token2str
 VALID_ATTRIBUTE_TOKENS = (lexer.T_IDENTITY, lexer.T_STRING, lexer.T_NUMBER, lexer.T_BOOLEAN)
 VALID_QUALIFIER_TOKENS = (lexer.T_REQUIRED, lexer.T_OPTIONAL, lexer.T_REPEATED)
 
-# 语法分析器
 class Parser(object):
+	''' 语法分析器
+	'''
 	def __init__(self, module, fileName):
 		super(Parser, self).__init__()
 		self.module = module
@@ -172,7 +173,7 @@ class Parser(object):
 	#属性 [mode, cmd, method, tag=value, ...]
 	def parseAttribute(self):
 		desc = "attribute"
-		attr = codes.Attribute()
+		attr = codes.Attribute(self.module.allocateAttrID())
 
 		self.matchNext('[', desc)
 

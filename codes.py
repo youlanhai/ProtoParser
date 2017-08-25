@@ -1,8 +1,21 @@
 #-*- coding: utf-8 -*-
 
-NUMBER_TYPES = set(("int8", "uint8", "int16", "uint16", "int32", "uint32", "int64", "uint64", "float", "double", ))
+NUMBER_TYPES = set((
+	"int8",
+	"uint8",
+	"int16",
+	"uint16",
+	"int32",
+	"uint32",
+	"int64",
+	"uint64",
+	"float",
+	"double",
+))
 
 class Member(object):
+	''' 消息的成员变量
+	'''
 	def __init__(self, index, qualifier, name, type, template):
 		super(Member, self).__init__()
 		self.index = index
@@ -18,6 +31,8 @@ class Member(object):
 
 
 class ClassDescriptor(object):
+	''' 消息类
+	'''
 	def __init__(self, name, type):
 		super(ClassDescriptor, self).__init__()
 		self.name = name
@@ -34,6 +49,8 @@ class ClassDescriptor(object):
 
 
 class FileDescriptor(object):
+	''' 协议文件
+	'''
 	def __init__(self, fileName):
 		super(FileDescriptor, self).__init__()
 		self.fileName = fileName
@@ -66,10 +83,13 @@ class FileDescriptor(object):
 		return False
 
 class Module(object):
-	def __init__(self):
+	''' 工程模块
+	'''
+	def __init__(self, attrIDCounter = 0):
 		super(Module, self).__init__()
 		self.files = {}
 		self.searchPath = []
+		self.attrIDCounter = attrIDCounter
 
 	def isFileParsed(self, fileName):
 		return fileName in self.files
@@ -81,20 +101,41 @@ class Module(object):
 		self.files[fileName] = fd
 		return fd
 
+	def allocateAttrID(self):
+		''' 分配属性id
+		'''
+		self.attrIDCounter += 1
+		return self.attrIDCounter
+
 ATTR_KEYS = ["mode", "cmd", "method"]
 
 class Attribute(object):
-	def __init__(self):
+	'''消息属性。'//@'开头的行，格式::
+
+		[mode, cmd, method, key=value, ...]
+
+	'''
+	def __init__(self, id = 0):
+		self.id = id
 		self.index = 0
 		self.attributes = {}
 
 	def addSingleValue(self, value):
+		''' 添加值属性。会根据索引位置，自动转换成键-值对格式
+		'''
 		if self.index >= len(ATTR_KEYS):
 			raise ValueError, "无效的属性 %s" % str(value)
+
+		# 如果未指定协议号，则自动生成
+		if self.index == 1 and isinstance(value, str):
+			self.addPairValue("cmd", self.id)
+			self.index += 1
 
 		key = ATTR_KEYS[self.index]
 		self.index += 1
 		self.addPairValue(key, value)
 
 	def addPairValue(self, key, value):
+		''' 添加键-值对属性
+		'''
 		self.attributes[key] = value
