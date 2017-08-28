@@ -84,5 +84,5 @@ class NormalGenerator(Generator):
 	def writeReturn(self, functions):
 		namespace = {"functions" : functions}
 		fmt = self.template.RETURN
-		tpl = Template(fmt, searchList = [namespace, self])
+		tpl = Template(fmt, searchList = [namespace, self, self.template])
 		self.stream.write(str(tpl))

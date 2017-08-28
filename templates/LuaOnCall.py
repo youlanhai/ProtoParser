@@ -36,7 +36,8 @@ end
 RETURN = """
 return {
 #for cmd, fun in $functions
-	[$cmd] = $fun,
+	#set onName = $genOnName($fun)
+	[$cmd] = $onName,
 #end for
 }
 """
