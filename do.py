@@ -88,7 +88,6 @@ def main():
 		name, ext = os.path.splitext(fname)
 		if ext != ".proto": continue
 
-		print "generate:", fname
 		srcFullPath = os.path.join(inputPath, fname)
 		convert(name, srcFullPath, outputPath, module)
 

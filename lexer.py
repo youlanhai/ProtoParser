@@ -20,7 +20,6 @@ T_SYNTAX 	= 269
 T_OPTION 	= 270
 T_PUBLIC 	= 271
 T_WEAK 		= 272
-T_BLANK 	= 273
 T_EXTENSIONS = 274
 T_RESERVED 	= 275
 T_TO 		= 276
@@ -56,7 +55,6 @@ TOKEN_2_NAME.update({
 	T_STRING 	: "string",
 	T_NUMBER 	: "number",
 	T_BOOLEAN 	: "boolean",
-	T_BLANK 	: "blank",
 })
 
 def token2str(tk):
@@ -67,14 +65,12 @@ def token2str(tk):
 def is_keyword_token(tk):
 	return tk in KEYWORD_TOKENS
 
-# 判断
-def is_valid_identity(tk):
-	return tk == T_IDENTITY or tk in KEYWORD_TOKENS
 
 # 词法分析器
 class Lexer(object):
-	def __init__(self, content):
+	def __init__(self, content, fileName):
 		super(Lexer, self).__init__()
+		self.fileName = fileName
 		self.content = content
 		self.index = 0
 		self.line = 1
@@ -122,25 +118,29 @@ class Lexer(object):
 	def readBlockComment(self):
 		ret = []
 
+		startLine = self.line
+		startColumn = self.column
+
+		ch = self.getchar()
 		while True:
-			ch = self.getchar()
 			if ch is None:
-				self.error('unclosed comment')
+				self.error('unclosed comment match line %d, column %d' % (startLine, startColumn))
 
 			if ch == '*':
 				chNext = self.getchar()
 				if chNext is None:
-					self.error("unclosed comment")
+					self.error("unclosed comment match line %d, column %d" % (startLine, startColumn))
 				elif chNext == '/': # `*/`
 					break # 唯一结束条件
 				else:
 					ret.append(ch)
-					ret.append(chNext)
+					ch = chNext
 			else:
 				if ch == '\n':
 					self.enterNextLine()
 
 				ret.append(ch)
+				ch = self.getchar()
 
 		return "".join(ret)
 
@@ -168,12 +168,12 @@ class Lexer(object):
 
 		return "".join(ret)
 
-	def next(self, includeBlank):
-		token = self.parseToken(includeBlank)
+	def next(self):
+		token = self.parseToken()
 		self.token = token
 		return token
 
-	def parseToken(self, includeBlank = False):
+	def parseToken(self):
 		self.value = None
 
 		while True:
@@ -185,8 +185,7 @@ class Lexer(object):
 				self.enterNextLine()
 
 			elif ch in string.whitespace:
-				if includeBlank:
-					return T_BLANK
+				pass
 
 			elif ch == '/':
 				ch = self.getchar()
@@ -255,7 +254,7 @@ class Lexer(object):
 
 	def error(self, msg):
 		self.isError = True
-		msg = "error: line=%d, column=%d, %s" % (self.line, self.column, msg)
+		msg = "error: file '%s', line=%d, column=%d, %s" % (self.fileName, self.line, self.column, msg)
 		raise RuntimeError, msg
 
 	def readNumber(self):

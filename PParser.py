@@ -41,18 +41,18 @@ class PParser(object):
 		self.tokenInfo = None
 		self.aheadTokenInfo = None
 
-	def nextToken(self, includeBlank = False):
+	def nextToken(self):
 		if self.aheadTokenInfo:
 			self.tokenInfo = self.aheadTokenInfo
 			self.aheadTokenInfo = None
 		else:
-			self.lexer.next(includeBlank)
+			self.lexer.next()
 			self.tokenInfo = TokenInfo(self.lexer)
 		return self.tokenInfo.token
 
-	def lookAhead(self, includeBlank = False):
+	def lookAhead(self):
 		if not self.aheadTokenInfo:
-			self.lexer.next(includeBlank)
+			self.lexer.next()
 			self.aheadTokenInfo = TokenInfo(self.lexer)
 		return self.aheadTokenInfo.token
 
@@ -60,7 +60,7 @@ class PParser(object):
 		print "parse:", self.fd.fileName
 
 		with open(self.fd.fileName, "r") as f:
-			self.lexer = lexer.Lexer(f.read())
+			self.lexer = lexer.Lexer(f.read(), self.fd.fileName)
 
 		tokenHandler = {
 			';' : self.parseEmpty,
@@ -111,7 +111,7 @@ class PParser(object):
 		attributes = [attr.attributes for attr in self.lastAttributes]
 		self.lastAttributes = []
 
-		name = self._parseIdentity(desc)
+		name = self._parseFullIdentity(desc)
 		if parent:
 			name = parent.name + "." + name
 
@@ -341,7 +341,8 @@ class PParser(object):
 		return ret
 
 	def error(self, desc, msg):
-		msg = "error: line=%d, column=%d, %s: %s" % (self.tokenInfo.line, self.tokenInfo.column, desc, msg)
+		msg = "error: file '%s', line=%d, column=%d, %s: %s" % (
+			self.fd.fileName, self.tokenInfo.line, self.tokenInfo.column, desc, msg)
 		raise RuntimeError, msg
 
 	#属性 [mode, cmd, method, tag=value, ...]
