@@ -15,16 +15,23 @@ import generators
 from PParser import PParser
 from argparse import ArgumentParser
 
-MODULE_PATH = os.path.abspath(os.path.dirname(__file__))
-OUTPUT_PATH = os.path.join(MODULE_PATH, "../scripts/network/protofunc")
-INPUT_PATH = os.path.join(MODULE_PATH, "../protos")
+def generate_code(generatorInfos, module, namespace):
+	for generatorInfo in generatorInfos:
+		cls = getattr(generators, generatorInfo["class"])
+		generator = cls(generatorInfo)
+
+		tpl = Template(generatorInfo["output"], searchList = [namespace, ])
+		dstPath = str(tpl)
+		generator.generate(namespace["NAME"], dstPath, module)
+
+	return
 
 def convert(name, srcPath, outputPath, module):
-	fileDesc = module.files.get(srcPath)
-	if fileDesc is None:
+	fileDescriptor = module.files.get(srcPath)
+	if fileDescriptor is None:
 		pa = PParser(module, srcPath)
 		pa.parse()
-		fileDesc = pa.fd
+		fileDescriptor = pa.fd
 
 	namespace = {
 		"NAME" : name,
@@ -32,14 +39,7 @@ def convert(name, srcPath, outputPath, module):
 		"OUTPUT_PATH" : outputPath,
 	}
 
-	for generatorInfo in ppconfig.CODE_GENERATORS:
-		cls = getattr(generators, generatorInfo["class"])
-		generator = cls(generatorInfo)
-
-		tpl = Template(generatorInfo["output"], searchList = [namespace, ])
-		dstPath = str(tpl)
-		generator.generate(name, dstPath, fileDesc)
-
+	generate_code(ppconfig.CODE_GENERATORS, fileDescriptor, namespace)
 	return True
 
 def parse_config(path):
@@ -90,6 +90,13 @@ def main():
 
 		srcFullPath = os.path.join(inputPath, fname)
 		convert(name, srcFullPath, outputPath, module)
+
+	namespace = {
+		"NAME" : os.path.basename(inputPath),
+		"SOURCE_FILE" : inputPath,
+		"OUTPUT_PATH" : outputPath,
+	}
+	generate_code(ppconfig.PROJECT_GENERATORS, module, namespace)
 
 if __name__ == "__main__":
 	main()

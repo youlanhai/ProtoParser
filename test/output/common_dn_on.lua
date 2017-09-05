@@ -21,6 +21,6 @@ end
 
 
 return {
-	[2] = broadcastPosition,
-	[3] = teleportTo,
+	[2] = onBroadcastPosition,
+	[3] = onTeleportTo,
 }

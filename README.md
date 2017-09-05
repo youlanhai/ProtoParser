@@ -46,7 +46,7 @@ end
 
 # 用法
 ```sh
-python do.py test/messages -output test/output
+python do.py -output test/output -config test/config.py test/messages
 ```
 
 # 代码模板

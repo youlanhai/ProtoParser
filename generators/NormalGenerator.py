@@ -3,8 +3,6 @@ import os
 from Cheetah.Template import Template
 
 from Generator import Generator
-import templates
-
 
 class NormalGenerator(Generator):
 	''' 通用代码生成器
@@ -19,8 +17,6 @@ class NormalGenerator(Generator):
 		super(NormalGenerator, self).__init__(generatorInfo)
 
 		self.mode = generatorInfo["mode"]
-		tplName = generatorInfo["template"]
-		self.template = getattr(templates, tplName)
 
 	def generate(self, inputFile, outputFile, fileDesc):
 		self.inputFile = inputFile

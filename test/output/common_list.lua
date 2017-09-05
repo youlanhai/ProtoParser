@@ -1,4 +1,6 @@
 
+-- this file is auto generate by ProtoParser tool.
+
 return {
 	{1, "up", "sendPosition", "common.Vector3"},
 	{2, "dn", "broadcastPosition", "common.Vector3"},

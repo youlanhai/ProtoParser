@@ -2,16 +2,10 @@
 import os
 from Cheetah.Template import Template
 from Generator import Generator
-import templates
 
 class ListGenerator(Generator):
 	''' 消息文件列表生成器。用于调试目的
 	'''
-
-	def __init__(self, generatorInfo):
-		super(ListGenerator, self).__init__(generatorInfo)
-		tplName = generatorInfo["template"]
-		self.template = getattr(templates, tplName)
 
 	def generate(self, inputFile, outputFile, fileDesc):
 		self.inputFile = inputFile
@@ -39,7 +33,7 @@ class ListGenerator(Generator):
 	def writeMessageList(self, messages):
 		namespace = {"messages" : messages}
 		
-		fmt = self.template.LIST
+		fmt = self.template.TEMPLATE
 		tpl = Template(fmt, searchList = [namespace, self])
 		self.stream.write(str(tpl))
 

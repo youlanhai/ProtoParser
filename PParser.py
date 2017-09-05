@@ -417,6 +417,7 @@ class PParser(object):
 		desc = "package"
 
 		name = self._parseFullIdentity(desc)
+		self.fd.setPackageName(name)
 		return
 
 	def parse_syntax(self):

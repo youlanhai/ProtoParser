@@ -1,3 +1,6 @@
+syntax = "proto2";
+
+package common;
 
 //@[up, sendPosition]
 //@[dn, broadcastPosition, send=sendToOthers]

@@ -58,6 +58,7 @@ class FileDescriptor(object):
 		self.codes = []
 		self.types = set()
 		self.includes = []
+		self.packageName = None
 
 	def addCode(self, cls):
 		self.codes.append(cls)
@@ -94,6 +95,9 @@ class FileDescriptor(object):
 				return code
 
 		return None
+
+	def setPackageName(self, name):
+		self.packageName = name
 
 class Module(object):
 	''' 工程模块

@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# 下面是一些通用的宏，拼接路径字符串的时候可以使用：
-# OUTPUT_PATH : 输出的文件夹路径
-# NAME : 输入文件的名称
-# SOURCE_FILE : 输入文件的全名
-
 #: 代码生成器配置
 CODE_GENERATORS = [
 	{
@@ -26,10 +21,30 @@ CODE_GENERATORS = [
 		"template" : "LuaCall",
 		"output" : "${OUTPUT_PATH}/${NAME}_dn.lua",
 	},
+	{
+		"mode" : "up",
+		"class" : "NormalGenerator",
+		"template" : "LuaOnCall",
+		"output" : "${OUTPUT_PATH}/${NAME}_up_on.lua",
+	},
+	{
+		"mode" : "dn",
+		"class" : "NormalGenerator",
+		"template" : "LuaOnCall",
+		"output" : "${OUTPUT_PATH}/${NAME}_dn_on.lua",
+	},
+	{
+		"class" : "ListGenerator",
+		"template" : "LuaList",
+		"output" : "${OUTPUT_PATH}/${NAME}_list.lua",
+	},
 ]
 
 #: 针对工程的生成器配置
-PROJECT_GENERATORS = []
-
-def custom_init():
-	pass
+PROJECT_GENERATORS = [
+	{
+		"class" : "PackageGenerator",
+		"template" : "LuaPackage",
+		"output" : "${OUTPUT_PATH}/${NAME}.lua",
+	}
+]

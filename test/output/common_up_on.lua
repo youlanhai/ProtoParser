@@ -29,7 +29,7 @@ end
 
 
 return {
-	[1] = sendPosition,
-	[1000] = setRotation,
-	[1001] = login,
+	[1] = onSendPosition,
+	[1000] = onSetRotation,
+	[1001] = onLogin,
 }

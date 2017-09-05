@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import templates
 
 INDENT_CHAR = "    "
 NEW_LINE = "\n"
@@ -10,6 +11,11 @@ class Generator(object):
 		super(Generator, self).__init__()
 		self.generatorInfo = generatorInfo
 		self.stream = None
+		self.template = None
+
+		tplName = generatorInfo.get("template")
+		if tplName:
+			self.template = getattr(templates, tplName)
 
 	def write(self, indent, *args):
 		if indent > 0: self.stream.write(INDENT_CHAR * indent)
