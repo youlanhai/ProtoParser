@@ -4,20 +4,23 @@ import string
 import re
 
 # token
-T_NONE = 0
-
-T_IDENTITY = 257
-T_MESSAGE = 258
-T_ENUM = 259
-T_STRING = 260
-T_IMPORT = 261
-T_REQUIRED = 262
-T_OPTIONAL = 263
-T_REPEATED = 264
-T_PACKAGE = 265
+T_IDENTITY 	= 257
+T_MESSAGE 	= 258
+T_ENUM 		= 259
+T_STRING 	= 260
+T_IMPORT 	= 261
+T_REQUIRED 	= 262
+T_OPTIONAL 	= 263
+T_REPEATED 	= 264
+T_PACKAGE 	= 265
 T_ATTRIBUTE = 266
-T_NUMBER = 267
-T_BOOLEAN = 268
+T_NUMBER 	= 267
+T_BOOLEAN 	= 268
+T_SYNTAX 	= 269
+T_OPTION 	= 270
+T_PUBLIC 	= 271
+T_WEAK 		= 272
+T_BLANK 	= 273
 
 KEYWORDS = {
 	"message" 	: T_MESSAGE,
@@ -27,6 +30,10 @@ KEYWORDS = {
 	"optional" 	: T_OPTIONAL,
 	"repeated" 	: T_REPEATED,
 	"package" 	: T_PACKAGE,
+	"syntax" 	: T_SYNTAX,
+	"option" 	: T_OPTION,
+	"public" 	: T_PUBLIC,
+	"weak" 		: T_WEAK,
 }
 
 KEYWORD_TOKENS = set([tk for tk in KEYWORDS.itervalues()])
@@ -34,20 +41,15 @@ KEYWORD_TOKENS = set([tk for tk in KEYWORDS.itervalues()])
 VAR_NAME_LETTER = string.letters + string.digits + '_'
 VAR_NAME_PATTERN = re.compile(r"^[_a-zA-Z]\w*$")
 
-TOKEN_2_NAME = {
+TOKEN_2_NAME = {key : val for val, key in KEYWORDS.iteritems()}
+TOKEN_2_NAME.update({
 	T_IDENTITY 	: "identity",
-	T_MESSAGE 	: "message",
-	T_ENUM 		: "enum",
-	T_STRING 	: "string",
-	T_IMPORT 	: "import",
-	T_REQUIRED 	: "required",
-	T_OPTIONAL 	: "optional",
-	T_REPEATED 	: "repeated",
-	T_PACKAGE 	: "package",
 	T_ATTRIBUTE : "attribute",
+	T_STRING 	: "string",
 	T_NUMBER 	: "number",
 	T_BOOLEAN 	: "boolean",
-}
+	T_BLANK 	: "blank",
+})
 
 def token2str(tk):
 	if type(tk) == str:
@@ -69,7 +71,9 @@ class Lexer(object):
 		self.index = 0
 		self.line = 1
 		self.column = 1
-		self.lastValue = None
+
+		self.token = None
+		self.value = None
 
 	def getchar(self):
 		index = self.index
@@ -156,8 +160,13 @@ class Lexer(object):
 
 		return "".join(ret)
 
-	def next(self):
-		self.lastValue = None
+	def next(self, includeBlank):
+		token = self.parseToken(includeBlank)
+		self.token = token
+		return token
+
+	def parseToken(self, includeBlank = False):
+		self.value = None
 
 		while True:
 			ch = self.getchar()
@@ -168,7 +177,8 @@ class Lexer(object):
 				self.enterNextLine()
 
 			elif ch in string.whitespace:
-				pass
+				if includeBlank:
+					return T_BLANK
 
 			elif ch == '/':
 				ch = self.getchar()
@@ -187,19 +197,19 @@ class Lexer(object):
 					self.error("invalid symbol '%s'" % ch)
 
 			elif ch == '"':
-				self.lastValue = self.readString()
-				if self.lastValue is None:
+				self.value = self.readString()
+				if self.value is None:
 					break
 				return T_STRING
 
-			elif ch in '={}<>,;[]':
+			elif ch in '.={}<>,;[]()':
 				return ch
 
 			elif ch in '+-':
 				ch = self.getchar()
 				if ch in string.digits:
 					self.ungetchar()
-					self.lastValue = self.readNumber()
+					self.value = self.readNumber()
 					return T_NUMBER
 
 				else:
@@ -207,7 +217,7 @@ class Lexer(object):
 
 			elif ch in string.digits:
 				self.ungetchar()
-				self.lastValue = self.readNumber()
+				self.value = self.readNumber()
 				return T_NUMBER
 
 			elif ch in VAR_NAME_LETTER:
@@ -215,18 +225,18 @@ class Lexer(object):
 				value = self.readIdentity()
 
 				if value == "true":
-					self.lastValue = True
+					self.value = True
 					return T_BOOLEAN
 
 				elif value == "false":
-					self.lastValue = False
+					self.value = False
 					return T_BOOLEAN
 
 				if value is None:
 					break
 
 				else:
-					self.lastValue = value
+					self.value = value
 					return KEYWORDS.get(value, T_IDENTITY)
 
 			else:

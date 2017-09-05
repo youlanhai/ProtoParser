@@ -6,7 +6,7 @@ import imp
 try:
 	from Cheetah.Template import Template
 except:
-	"Python module 'Cheetah' was required. use command `pip install Cheetah` to install it."
+	print "Python module 'Cheetah' was required. use command `pip install Cheetah` to install it."
 	exit()
 
 import codes

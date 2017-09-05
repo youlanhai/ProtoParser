@@ -1,4 +1,5 @@
 #-*- coding: utf-8 -*-
+import os
 
 NUMBER_TYPES = set((
 	"int8",
@@ -82,6 +83,18 @@ class FileDescriptor(object):
 
 		return False
 
+	def findType(self, name):
+		if name in self.types:
+			for code in self.codes:
+				if name == code.name:
+					return code
+		for fd in self.includes:
+			code = fd.findType(name)
+			if code:
+				return code
+
+		return None
+
 class Module(object):
 	''' 工程模块
 	'''
@@ -106,6 +119,14 @@ class Module(object):
 		'''
 		self.attrIDCounter += 1
 		return self.attrIDCounter
+
+	def findFileFullPath(self, fname):
+		for path in self.searchPath:
+			fullPath = os.path.join(path, fname)
+			if os.path.isfile(fullPath):
+				return fullPath
+
+		return None
 
 ATTR_KEYS = ["mode", "cmd", "method"]
 
