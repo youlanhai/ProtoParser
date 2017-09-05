@@ -21,6 +21,10 @@ T_OPTION 	= 270
 T_PUBLIC 	= 271
 T_WEAK 		= 272
 T_BLANK 	= 273
+T_EXTENSIONS = 274
+T_RESERVED 	= 275
+T_TO 		= 276
+T_EXTEND 	= 277
 
 KEYWORDS = {
 	"message" 	: T_MESSAGE,
@@ -34,6 +38,10 @@ KEYWORDS = {
 	"option" 	: T_OPTION,
 	"public" 	: T_PUBLIC,
 	"weak" 		: T_WEAK,
+	"extensions": T_EXTENSIONS,
+	"reserved" 	: T_RESERVED,
+	"to" 		: T_TO,
+	"extend" 	: T_EXTEND,
 }
 
 KEYWORD_TOKENS = set([tk for tk in KEYWORDS.itervalues()])

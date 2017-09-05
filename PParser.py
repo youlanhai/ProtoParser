@@ -70,7 +70,7 @@ class PParser(object):
 		while token is not None:
 			handler = None
 
-			if lexer.is_keyword_token(token):
+			if lexer.is_keyword_token(token) or token in (lexer.T_ATTRIBUTE, ):
 				funName = "parse_" + lexer.token2str(token)
 				handler = getattr(self, funName, None)
 
@@ -105,18 +105,21 @@ class PParser(object):
 	def parseEmpty(self):
 		pass
 
-	def parse_message(self, append = False):
+	def parse_message(self, extend = False, parent = None):
 		desc = "message"
 
 		attributes = [attr.attributes for attr in self.lastAttributes]
 		self.lastAttributes = []
 
 		name = self._parseIdentity(desc)
+		if parent:
+			name = parent.name + "." + name
+
 		cls = None
-		if append:
+		if extend:
 			cls = self.fd.findType(name)
 
-		else:
+		if cls is None:
 			if self.fd.isTypeExist(name):
 				self.error(desc, "type '%s' has been exist." % name)
 
@@ -128,40 +131,67 @@ class PParser(object):
 
 		token = self.nextToken()
 		while token != None and token != '}':
+			if token == ';':
+				pass
 
-			if token not in VALID_QUALIFIER_TOKENS:
+			elif token == lexer.T_MESSAGE:
+				self.parse_message(parent = cls)
+
+			elif token == lexer.T_ENUM:
+				self.parse_enum(parent = cls)
+
+			elif token == lexer.T_OPTION:
+				self.parse_option()
+
+			elif token in VALID_QUALIFIER_TOKENS:
+				self._parseMessageVarFiled(cls, desc)
+
+			elif token == lexer.T_EXTENSIONS:
+				self._parseExtensions(cls)
+
+			elif token == lexer.T_RESERVED:
+				self._parseReserved(cls)
+
+			elif token == lexer.T_EXTEND:
+				self.parse_extend(parent = cls)
+
+			else:
 				self.error(desc, "invalid token %s" % token2str(token))
-
-			varQualifier = token2str(token)
-			varType = self._parseFullIdentity(desc)
-
-			varTemplateArgs = None
-			varName = None
-
-			token = self.lookAhead()
-			if token == '<':
-				varTemplateArgs = self._parseTemplateArgs(desc)
-
-			varName = self._parseIdentity(desc)
-
-			self.matchNext('=', desc)
-
-			self.matchNext(lexer.T_NUMBER, desc)
-			varOrder = self.tokenInfo.value
-
-			token = self.nextToken()
-			if token == '[':
-				self._parseFiledOption(desc)
-
-			self.matchToken(token, ';', desc)
-			cls.addMember(varOrder, varQualifier, varName, varType, varTemplateArgs)
 
 			token = self.nextToken()
 
 		self.matchToken(token, '}', desc)
 		self.lastAttributes = []
 
+	def _parseMessageVarFiled(self, cls, desc):
+		token = self.tokenInfo.token
+
+		varQualifier = token2str(token)
+		varType = self._parseFullIdentity(desc)
+
+		varTemplateArgs = None
+		varName = None
+
+		token = self.lookAhead()
+		if token == '<':
+			varTemplateArgs = self._parseTemplateArgs(desc)
+
+		varName = self._parseIdentity(desc)
+
+		self.matchNext('=', desc)
+
+		self.matchNext(lexer.T_NUMBER, desc)
+		varOrder = self.tokenInfo.value
+
+		token = self.lookAhead()
+		if token == '[':
+			self._parseFiledOption(desc)
+
+		self.matchNext(';', desc)
+		cls.addMember(varOrder, varQualifier, varName, varType, varTemplateArgs)
+
 	def _parseFiledOption(self, desc):
+		self.nextToken() # ignore '['
 		while True:
 			self.matchNext(lexer.T_IDENTITY, desc)
 			self.matchNext('=', desc)
@@ -174,7 +204,65 @@ class PParser(object):
 			self.matchToken(token, ',', desc)
 		return
 
-	def parse_enum(self):
+	def _parseRange(self, parent, desc):
+		while True:
+			self.matchNext(lexer.T_NUMBER, desc)
+			litMin = self.tokenInfo.value
+			litMax = None
+
+			token = self.nextToken()
+			if token == lexer.T_TO:
+				token = self.nextToken()
+				if token == lexer.T_NUMBER:
+					litMax = self.tokenInfo.value
+				elif token == lexer.T_IDENTITY and self.tokenInfo.value == "max":
+					pass
+				else:
+					self.error(desc, "invalid token '%s'" % token2str(token))
+
+				token = self.nextToken()
+
+			if token == ';':
+				break
+
+			self.matchToken(token, ',', desc)
+		return
+
+	def _parseFieldList(self, parent, desc):
+		while True:
+			self.matchNext(lexer.T_STRING, desc)
+
+			token = self.nextToken()
+			if token == ';':
+				break
+
+			self.matchToken(token, ',', desc)
+		return
+
+	def _parseExtensions(self, parent):
+		''' extensions = "extensions" ranges ";"
+			ranges = range { "," range }
+			range =  intLit [ "to" ( intLit | "max" ) ]
+		'''
+		desc = "extensions"
+		self._parseRange(parent, desc)
+		return
+
+	def _parseReserved(self, parent):
+		'''	reserved = "reserved" ( ranges | fieldNames ) ";"
+			fieldNames = fieldName { "," fieldName }
+		'''
+		desc = "reserved"
+		token = self.lookAhead()
+		if token == lexer.T_NUMBER:
+			self._parseRange(parent, desc)
+
+		elif token == lexer.T_STRING:
+			self._parseFieldList(parent, desc)
+
+		return
+
+	def parse_enum(self, parent = None):
 		desc = "enum"
 		name = self._parseIdentity(desc)
 		self.matchNext('{', desc)
@@ -355,5 +443,5 @@ class PParser(object):
 		self.matchNext('=', desc)
 		self.matchNext(VALID_VALUE_TOKENS, desc)
 
-	def parse_extend(self):
-		self.parse_message(True)
+	def parse_extend(self, parent = None):
+		self.parse_message(True, parent)
