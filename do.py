@@ -9,10 +9,10 @@ except:
 	print "Python module 'Cheetah' was required. use command `pip install Cheetah` to install it."
 	exit()
 
-import codes
 import ppconfig
 import generators
-from PParser import PParser
+from cores import codes
+from cores.PParser import PParser
 from argparse import ArgumentParser
 
 def generate_code(generatorInfos, module, namespace):
