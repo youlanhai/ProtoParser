@@ -77,12 +77,7 @@ class FileDescriptor(object):
 		return False
 
 	def isTypeExist(self, tp):
-		if tp in self.types: return True
-
-		for fd in self.includes:
-			if fd.isTypeExist(tp): return True
-
-		return False
+		return tp in self.types
 
 	def findType(self, name):
 		if name in self.types:
