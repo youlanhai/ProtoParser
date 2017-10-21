@@ -1,19 +1,6 @@
 #-*- coding: utf-8 -*-
 import os
 
-NUMBER_TYPES = set((
-	"int8",
-	"uint8",
-	"int16",
-	"uint16",
-	"int32",
-	"uint32",
-	"int64",
-	"uint64",
-	"float",
-	"double",
-))
-
 class Member(object):
 	''' 消息的成员变量
 	'''
@@ -25,12 +12,6 @@ class Member(object):
 		self.template = template
 		self.qualifier = qualifier
 
-		self.isNumber = type in NUMBER_TYPES
-		self.isVector = qualifier == "repeated"
-		self.isMap = type.startswith("map")
-		self.isContainer = self.isVector or self.isMap
-
-
 class ClassDescriptor(object):
 	''' 消息类
 	'''
@@ -40,6 +21,7 @@ class ClassDescriptor(object):
 		self.type = type
 		self.members = []
 		self.attributes = []
+		self.options = {}
 
 	def addMember(self, varOrder, varQualifier, varName, varType, varTemplateArgs):
 		member = Member(varOrder, varQualifier, varName, varType, varTemplateArgs)
@@ -47,6 +29,9 @@ class ClassDescriptor(object):
 
 	def setAttributes(self, attributes):
 		self.attributes = attributes
+
+	def addOption(self, name, value):
+		self.options[name] = value
 
 
 class FileDescriptor(object):
@@ -59,6 +44,7 @@ class FileDescriptor(object):
 		self.types = set()
 		self.includes = []
 		self.packageName = None
+		self.options = {}
 
 	def addCode(self, cls):
 		self.codes.append(cls)
@@ -93,6 +79,9 @@ class FileDescriptor(object):
 
 	def setPackageName(self, name):
 		self.packageName = name
+
+	def addOption(self, name, value):
+		self.options[name] = value
 
 class Module(object):
 	''' 工程模块

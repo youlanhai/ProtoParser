@@ -80,7 +80,7 @@ class PParser(object):
 			if handler is None:
 				self.error("Parser", "invalid token '%s'" % token2str(token))
 
-			handler()
+			handler(parent = self.fd)
 			token = self.nextToken()
 
 		self.lexer = None
@@ -102,10 +102,10 @@ class PParser(object):
 		self.error(desc, "token '%s' expected, but '%s' was given." % (tokeName, token2str(given)))
 		return
 
-	def parseEmpty(self):
+	def parseEmpty(self, parent = None):
 		pass
 
-	def parse_message(self, extend = False, parent = None):
+	def parse_message(self, parent = None, extend = False):
 		desc = "message"
 
 		attributes = [attr.attributes for attr in self.lastAttributes]
@@ -141,7 +141,7 @@ class PParser(object):
 				self.parse_enum(parent = cls)
 
 			elif token == lexer.T_OPTION:
-				self.parse_option()
+				self.parse_option(cls)
 
 			elif token in VALID_QUALIFIER_TOKENS:
 				self._parseMessageVarFiled(cls, desc)
@@ -284,7 +284,7 @@ class PParser(object):
 
 		self.matchToken(token, '}', desc)
 
-	def parse_import(self):
+	def parse_import(self, parent = None):
 		desc = "import"
 
 		token = self.nextToken()
@@ -346,7 +346,7 @@ class PParser(object):
 		raise RuntimeError, msg
 
 	#属性 [mode, cmd, method, tag=value, ...]
-	def parse_attribute(self):
+	def parse_attribute(self, parent = None):
 		desc = "attribute"
 		attr = codes.Attribute(self.module.allocateAttrID())
 
@@ -413,14 +413,14 @@ class PParser(object):
 
 		return name
 
-	def parse_package(self):
+	def parse_package(self, parent = None):
 		desc = "package"
 
 		name = self._parseFullIdentity(desc)
-		self.fd.setPackageName(name)
+		parent.setPackageName(name)
 		return
 
-	def parse_syntax(self):
+	def parse_syntax(self, parent = None):
 		desc = "syntax"
 		self.matchNext('=', desc)
 		self.matchNext(lexer.T_STRING, desc)
@@ -430,10 +430,11 @@ class PParser(object):
 
 		return
 
-	def parse_option(self):
+	def parse_option(self, parent = None):
 		desc = "option"
 
 		name = None
+		value = None
 		prefixToken = self.lookAhead()
 		if prefixToken == '(':
 			self.nextToken()
@@ -444,6 +445,10 @@ class PParser(object):
 
 		self.matchNext('=', desc)
 		self.matchNext(VALID_VALUE_TOKENS, desc)
+		value = self.tokenInfo.value
+
+		if parent:
+			parent.addOption(name, value)
 
 	def parse_extend(self, parent = None):
-		self.parse_message(True, parent)
+		self.parse_message(parent, True)
