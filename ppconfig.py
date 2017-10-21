@@ -31,5 +31,7 @@ CODE_GENERATORS = [
 #: 针对工程的生成器配置
 PROJECT_GENERATORS = []
 
+MAX_EXPAND_ARGS = 5
+
 def custom_init():
 	pass

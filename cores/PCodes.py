@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 import os
+import ppconfig
 
 class Member(object):
 	''' 消息的成员变量
@@ -75,7 +76,24 @@ class ClassDescriptor(IType):
 				if attr.isAutoCMD:
 					attr.updatePairValue("cmd", cmd)
 
-		self.attributes = [attr.attributes for attr in attributes]
+		if len(attributes) > 0:
+			self.attributes = [attr.attributes for attr in attributes]
+		elif cmd is not None:
+			expand = len(self.members) <= ppconfig.MAX_EXPAND_ARGS
+			self.attributes = [
+				{
+					"mode" : "up",
+					"cmd" : cmd,
+					"method" : "cmd" + self.name,
+					"expand" : expand,
+				},
+				{
+					"mode" : "dn",
+					"cmd" : cmd,
+					"method" : "onCmd" + self.name,
+					"expand" : expand,
+				},
+			]
 
 	def findType(self, name):
 		try:
