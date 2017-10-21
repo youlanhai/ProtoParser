@@ -11,7 +11,7 @@ except:
 
 import ppconfig
 import generators
-from cores import codes
+from cores import PCodes
 from cores.PParser import PParser
 from argparse import ArgumentParser
 
@@ -80,7 +80,7 @@ def main():
 	else:
 		os.mkdir(outputPath)
 
-	module = codes.Module()
+	module = PCodes.Module()
 	module.searchPath = [inputPath]
 
 	files = os.listdir(inputPath)

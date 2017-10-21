@@ -21,6 +21,8 @@ class ListGenerator(Generator):
 		ret = []
 
 		for clsDesc in fileDesc.codes:
+			if clsDesc.type != "message": continue
+
 			protoName = "%s.%s" % (self.moduleName, clsDesc.name)
 			for attr in clsDesc.attributes:
 				mode = attr["mode"]

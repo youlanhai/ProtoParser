@@ -67,9 +67,9 @@ def is_keyword_token(tk):
 
 
 # 词法分析器
-class Lexer(object):
+class PLexer(object):
 	def __init__(self, content, fileName):
-		super(Lexer, self).__init__()
+		super(PLexer, self).__init__()
 		self.fileName = fileName
 		self.content = content
 		self.index = 0

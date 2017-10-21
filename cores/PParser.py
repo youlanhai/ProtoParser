@@ -1,13 +1,21 @@
 #-*- coding: utf-8 -*-
-
-import lexer
-import codes
 import os
+import PCodes
+import PLexer
+from PLexer import token2str, is_keyword_token
 
-from lexer import token2str
+VALID_VALUE_TOKENS = (
+	PLexer.T_IDENTITY,
+	PLexer.T_STRING,
+	PLexer.T_NUMBER,
+	PLexer.T_BOOLEAN
+)
 
-VALID_VALUE_TOKENS = (lexer.T_IDENTITY, lexer.T_STRING, lexer.T_NUMBER, lexer.T_BOOLEAN)
-VALID_QUALIFIER_TOKENS = (lexer.T_REQUIRED, lexer.T_OPTIONAL, lexer.T_REPEATED)
+VALID_QUALIFIER_TOKENS = (
+	PLexer.T_REQUIRED,
+	PLexer.T_OPTIONAL,
+	PLexer.T_REPEATED
+)
 
 def is_expected_token(given, expected):
 	if isinstance(expected, int) or isinstance(expected, str):
@@ -16,7 +24,7 @@ def is_expected_token(given, expected):
 	return given in expected
 
 def is_identity_token(token):
-	return token == lexer.T_IDENTITY or lexer.is_keyword_token(token)
+	return token == PLexer.T_IDENTITY or is_keyword_token(token)
 
 
 class TokenInfo:
@@ -60,7 +68,7 @@ class PParser(object):
 		print "parse:", self.fd.fileName
 
 		with open(self.fd.fileName, "r") as f:
-			self.lexer = lexer.Lexer(f.read(), self.fd.fileName)
+			self.lexer = PLexer.PLexer(f.read(), self.fd.fileName)
 
 		tokenHandler = {
 			';' : self.parseEmpty,
@@ -70,8 +78,8 @@ class PParser(object):
 		while token is not None:
 			handler = None
 
-			if lexer.is_keyword_token(token) or token in (lexer.T_ATTRIBUTE, ):
-				funName = "parse_" + lexer.token2str(token)
+			if is_keyword_token(token) or token in (PLexer.T_ATTRIBUTE, ):
+				funName = "parse_" + token2str(token)
 				handler = getattr(self, funName, None)
 
 			if handler is None:
@@ -80,7 +88,7 @@ class PParser(object):
 			if handler is None:
 				self.error("Parser", "invalid token '%s'" % token2str(token))
 
-			handler(parent = self.fd)
+			handler(self.fd)
 			token = self.nextToken()
 
 		self.lexer = None
@@ -112,20 +120,17 @@ class PParser(object):
 		self.lastAttributes = []
 
 		name = self._parseFullIdentity(desc)
-		if parent:
-			name = parent.name + "." + name
-
 		cls = None
 		if extend:
-			cls = self.fd.findType(name)
+			cls = parent.findType(name)
 
 		if cls is None:
-			if self.fd.isTypeExist(name):
+			if parent.isTypeExist(name):
 				self.error(desc, "type '%s' has been exist." % name)
 
-			cls = codes.ClassDescriptor(name, "message")
+			cls = PCodes.ClassDescriptor(name, parent)
 			cls.setAttributes(attributes)
-			self.fd.addCode(cls)
+			parent.addType(cls)
 
 		self.matchNext('{', desc)
 
@@ -134,25 +139,25 @@ class PParser(object):
 			if token == ';':
 				pass
 
-			elif token == lexer.T_MESSAGE:
+			elif token == PLexer.T_MESSAGE:
 				self.parse_message(parent = cls)
 
-			elif token == lexer.T_ENUM:
+			elif token == PLexer.T_ENUM:
 				self.parse_enum(parent = cls)
 
-			elif token == lexer.T_OPTION:
+			elif token == PLexer.T_OPTION:
 				self.parse_option(cls)
 
 			elif token in VALID_QUALIFIER_TOKENS:
 				self._parseMessageVarFiled(cls, desc)
 
-			elif token == lexer.T_EXTENSIONS:
+			elif token == PLexer.T_EXTENSIONS:
 				self._parseExtensions(cls)
 
-			elif token == lexer.T_RESERVED:
+			elif token == PLexer.T_RESERVED:
 				self._parseReserved(cls)
 
-			elif token == lexer.T_EXTEND:
+			elif token == PLexer.T_EXTEND:
 				self.parse_extend(parent = cls)
 
 			else:
@@ -180,7 +185,7 @@ class PParser(object):
 
 		self.matchNext('=', desc)
 
-		self.matchNext(lexer.T_NUMBER, desc)
+		self.matchNext(PLexer.T_NUMBER, desc)
 		varOrder = self.tokenInfo.value
 
 		token = self.lookAhead()
@@ -193,7 +198,7 @@ class PParser(object):
 	def _parseFiledOption(self, desc):
 		self.nextToken() # ignore '['
 		while True:
-			self.matchNext(lexer.T_IDENTITY, desc)
+			self.matchNext(PLexer.T_IDENTITY, desc)
 			self.matchNext('=', desc)
 			self.matchNext(VALID_VALUE_TOKENS, desc)
 
@@ -206,16 +211,16 @@ class PParser(object):
 
 	def _parseRange(self, parent, desc):
 		while True:
-			self.matchNext(lexer.T_NUMBER, desc)
+			self.matchNext(PLexer.T_NUMBER, desc)
 			litMin = self.tokenInfo.value
 			litMax = None
 
 			token = self.nextToken()
-			if token == lexer.T_TO:
+			if token == PLexer.T_TO:
 				token = self.nextToken()
-				if token == lexer.T_NUMBER:
+				if token == PLexer.T_NUMBER:
 					litMax = self.tokenInfo.value
-				elif token == lexer.T_IDENTITY and self.tokenInfo.value == "max":
+				elif token == PLexer.T_IDENTITY and self.tokenInfo.value == "max":
 					pass
 				else:
 					self.error(desc, "invalid token '%s'" % token2str(token))
@@ -230,7 +235,7 @@ class PParser(object):
 
 	def _parseFieldList(self, parent, desc):
 		while True:
-			self.matchNext(lexer.T_STRING, desc)
+			self.matchNext(PLexer.T_STRING, desc)
 
 			token = self.nextToken()
 			if token == ';':
@@ -254,10 +259,10 @@ class PParser(object):
 		'''
 		desc = "reserved"
 		token = self.lookAhead()
-		if token == lexer.T_NUMBER:
+		if token == PLexer.T_NUMBER:
 			self._parseRange(parent, desc)
 
-		elif token == lexer.T_STRING:
+		elif token == PLexer.T_STRING:
 			self._parseFieldList(parent, desc)
 
 		return
@@ -267,13 +272,26 @@ class PParser(object):
 		name = self._parseIdentity(desc)
 		self.matchNext('{', desc)
 
+		enum = PCodes.EnumDescriptor(name)
+		parent.addType(enum)
+
 		token = self.nextToken()
+		sequenceID = 0
 		while token != None and token != '}':
 			self.matchIdentity(token, desc)
 			fieldName = self.tokenInfo.value
+			fieldValue = None
 
-			self.matchNext('=', desc)
-			self.matchNext(lexer.T_NUMBER, desc)
+			token = self.nextToken()
+			if token == '=':
+				token = self.matchNext(PLexer.T_NUMBER, desc)
+				fieldValue = self.tokenInfo.value
+				sequenceID = fieldValue + 1
+			else:
+				fieldValue = sequenceID
+				sequenceID += 1
+
+			enum.addField(fieldName, fieldValue)
 
 			token = self.nextToken()
 			if token == '}':
@@ -288,10 +306,10 @@ class PParser(object):
 		desc = "import"
 
 		token = self.nextToken()
-		if token in (lexer.T_PUBLIC, lexer.T_WEAK):
+		if token in (PLexer.T_PUBLIC, PLexer.T_WEAK):
 			token = self.nextToken()
 
-		self.matchToken(token, lexer.T_STRING, desc)
+		self.matchToken(token, PLexer.T_STRING, desc)
 		fname = self.tokenInfo.value
 
 
@@ -348,7 +366,7 @@ class PParser(object):
 	#属性 [mode, cmd, method, tag=value, ...]
 	def parse_attribute(self, parent = None):
 		desc = "attribute"
-		attr = codes.Attribute(self.module.allocateAttrID())
+		attr = PCodes.Attribute(self.module.allocateAttrID())
 
 		self.matchNext('[', desc)
 
@@ -417,17 +435,19 @@ class PParser(object):
 		desc = "package"
 
 		name = self._parseFullIdentity(desc)
-		parent.setPackageName(name)
+		self.fd.setPackageName(name)
 		return
 
 	def parse_syntax(self, parent = None):
 		desc = "syntax"
 		self.matchNext('=', desc)
-		self.matchNext(lexer.T_STRING, desc)
+		self.matchNext(PLexer.T_STRING, desc)
 
-		if self.tokenInfo.value != "proto2":
-			self.error(desc, "only 'proto2' was supported. but '%s' was given", self.tokenInfo.value)
+		syntax = self.tokenInfo.value
+		if syntax != "proto2":
+			self.error(desc, "only 'proto2' was supported. but '%s' was given", syntax)
 
+		self.fd.setSyntax(syntax)
 		return
 
 	def parse_option(self, parent = None):
@@ -447,8 +467,7 @@ class PParser(object):
 		self.matchNext(VALID_VALUE_TOKENS, desc)
 		value = self.tokenInfo.value
 
-		if parent:
-			parent.addOption(name, value)
+		parent.addOption(name, value)
 
 	def parse_extend(self, parent = None):
 		self.parse_message(parent, True)

@@ -38,7 +38,8 @@ class NormalGenerator(Generator):
 		self.writeNewLine()
 
 		for clsDesc in fileDesc.codes:
-			self.writeClassCodes(clsDesc)
+			if clsDesc.type == "message":
+				self.writeClassCodes(clsDesc)
 
 	def writeFileHeader(self):
 		fmt = self.template.HEADER

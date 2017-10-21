@@ -12,16 +12,54 @@ class Member(object):
 		self.template = template
 		self.qualifier = qualifier
 
-class ClassDescriptor(object):
-	''' 消息类
-	'''
+
+class EnumDescriptor(object):
+	def __init__(self, name, parent = None):
+		self.name = name
+		self.parent = parent
+		self.type = "enum"
+		self.fields = {}
+
+	def addField(self, key, value):
+		self.fields[key] = value
+
+
+class IType(object):
 	def __init__(self, name, type):
-		super(ClassDescriptor, self).__init__()
+		super(IType, self).__init__()
 		self.name = name
 		self.type = type
+		self.codes = []
+		self.types = {}
+		self.options = {}
+
+	def addOption(self, name, value):
+		self.options[name] = value
+
+	def addType(self, tp):
+		if tp in self.types:
+			raise TypeError, "type '%s' has been exist" % tp.name
+		self.types[tp.name] = tp
+		self.codes.append(tp)
+
+	def isTypeExist(self, name):
+		return name in self.types
+
+	def getType(self, name):
+		return self.types.get(name)
+
+	def findType(self, name):
+		return self.getType(name)
+
+
+class ClassDescriptor(IType):
+	''' 消息类
+	'''
+	def __init__(self, name, parent):
+		super(ClassDescriptor, self).__init__(name, "message")
+		self.parent = parent
 		self.members = []
 		self.attributes = []
-		self.options = {}
 
 	def addMember(self, varOrder, varQualifier, varName, varType, varTemplateArgs):
 		member = Member(varOrder, varQualifier, varName, varType, varTemplateArgs)
@@ -30,25 +68,22 @@ class ClassDescriptor(object):
 	def setAttributes(self, attributes):
 		self.attributes = attributes
 
-	def addOption(self, name, value):
-		self.options[name] = value
+	def findType(self, name):
+		try:
+			return self.types[name]
+		except:
+			return self.parent.findType(name)
 
 
-class FileDescriptor(object):
+class FileDescriptor(IType):
 	''' 协议文件
 	'''
 	def __init__(self, fileName):
-		super(FileDescriptor, self).__init__()
+		super(FileDescriptor, self).__init__(fileName, "file")
 		self.fileName = fileName
-		self.codes = []
-		self.types = set()
 		self.includes = []
 		self.packageName = None
-		self.options = {}
-
-	def addCode(self, cls):
-		self.codes.append(cls)
-		self.types.add(cls.name)
+		self.syntax = "proto2";
 
 	def addInclude(self, fd):
 		if fd.isFDExist(self): return False #循环包含
@@ -62,14 +97,12 @@ class FileDescriptor(object):
 			if inc.isFDExist(fd): return True
 		return False
 
-	def isTypeExist(self, tp):
-		return tp in self.types
-
 	def findType(self, name):
-		if name in self.types:
-			for code in self.codes:
-				if name == code.name:
-					return code
+		try:
+			return self.types[name]
+		except:
+			pass
+
 		for fd in self.includes:
 			code = fd.findType(name)
 			if code:
@@ -80,8 +113,9 @@ class FileDescriptor(object):
 	def setPackageName(self, name):
 		self.packageName = name
 
-	def addOption(self, name, value):
-		self.options[name] = value
+	def setSyntax(self, syntax):
+		self.syntax = syntax
+
 
 class Module(object):
 	''' 工程模块
