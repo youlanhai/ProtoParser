@@ -63,6 +63,7 @@ class NormalGenerator(Generator):
 			"send" 		: attr.get("send", "sendProto"),
 			"cmd" 		: attr["cmd"],
 			"method" 	: attr["method"],
+			"comment" 	: clsDesc.getOption("comment"),
 		}
 
 	def writeCallMethod(self, attr, clsDesc):

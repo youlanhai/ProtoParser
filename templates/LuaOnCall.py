@@ -12,6 +12,9 @@ def genOnName(name):
 	return "on" + name[0].upper() + name[1:]
 
 EXPAND_METHOD = """
+#if $comment
+-- ${comment}
+#end if
 #set onName = $genOnName($method)
 local function ${onName}(data)
 	local proto = $moduleName.${className}()
@@ -24,6 +27,9 @@ end
 """
 
 COLLAPSED_METHOD = """
+#if $comment
+-- ${comment}
+#end if
 #set onName = $genOnName($method)
 local function ${onName}(data)
 	local proto = $moduleName.${className}()

@@ -36,6 +36,9 @@ class IType(object):
 	def addOption(self, name, value):
 		self.options[name] = value
 
+	def getOption(self, name):
+		return self.options.get(name)
+
 	def addType(self, tp):
 		if tp in self.types:
 			raise TypeError, "type '%s' has been exist" % tp.name
@@ -66,7 +69,13 @@ class ClassDescriptor(IType):
 		self.members.append(member)
 
 	def setAttributes(self, attributes):
-		self.attributes = attributes
+		cmd = self.getOption("protoType")
+		if cmd is not None:
+			for attr in attributes:
+				if attr.isAutoCMD:
+					attr.updatePairValue("cmd", cmd)
+
+		self.attributes = [attr.attributes for attr in attributes]
 
 	def findType(self, name):
 		try:
@@ -162,6 +171,7 @@ class Attribute(object):
 		self.id = id
 		self.index = 0
 		self.attributes = {}
+		self.isAutoCMD = False
 
 	def addSingleValue(self, value):
 		''' 添加值属性。会根据索引位置，自动转换成键-值对格式
@@ -172,6 +182,7 @@ class Attribute(object):
 		# 如果未指定协议号，则自动生成
 		if self.index == 1 and isinstance(value, str):
 			self.addPairValue("cmd", self.id)
+			self.isAutoCMD = True
 			self.index += 1
 
 		key = ATTR_KEYS[self.index]
@@ -181,4 +192,7 @@ class Attribute(object):
 	def addPairValue(self, key, value):
 		''' 添加键-值对属性
 		'''
+		self.attributes[key] = value
+
+	def updatePairValue(self, key, value):
 		self.attributes[key] = value

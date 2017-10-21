@@ -13,6 +13,9 @@ def genOnName(name):
 	return "on" + name[0].upper() + name[1:]
 
 EXPAND_METHOD = """
+#if $comment
+-- ${comment}
+#end if
 #set onName = $genOnName($method)
 local function ${onName}(proto)
 	#set values = ["proto." + v for v in $fields]
@@ -22,6 +25,9 @@ end
 """
 
 COLLAPSED_METHOD = """
+#if $comment
+-- ${comment}
+#end if
 #set onName = $genOnName($method)
 local function ${onName}(proto)
 	return "${onName}", proto, EMPTY_TABLE

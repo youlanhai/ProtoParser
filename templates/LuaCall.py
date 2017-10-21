@@ -8,6 +8,9 @@ local $moduleName = loadprotobuf "$moduleName"
 
 # args:  fields, method, moduleName, className, send, cmd
 EXPAND_METHOD = """
+#if $comment
+-- ${comment}
+#end if
 #set argText = "network"
 #if len($fields) > 0
 #set argText = $argText + ", " + ", ".join($fields)
@@ -22,6 +25,9 @@ end
 """
 
 COLLAPSED_METHOD = """
+#if $comment
+-- ${comment}
+#end if
 local function ${method}(network, proto)
 	network:${send}($cmd, proto)
 end

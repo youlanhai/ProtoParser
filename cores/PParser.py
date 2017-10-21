@@ -116,7 +116,7 @@ class PParser(object):
 	def parse_message(self, parent = None, extend = False):
 		desc = "message"
 
-		attributes = [attr.attributes for attr in self.lastAttributes]
+		attributes = self.lastAttributes
 		self.lastAttributes = []
 
 		name = self._parseFullIdentity(desc)
@@ -129,7 +129,6 @@ class PParser(object):
 				self.error(desc, "type '%s' has been exist." % name)
 
 			cls = PCodes.ClassDescriptor(name, parent)
-			cls.setAttributes(attributes)
 			parent.addType(cls)
 
 		self.matchNext('{', desc)
@@ -167,6 +166,8 @@ class PParser(object):
 
 		self.matchToken(token, '}', desc)
 		self.lastAttributes = []
+
+		cls.setAttributes(attributes)
 
 	def _parseMessageVarFiled(self, cls, desc):
 		token = self.tokenInfo.token
