@@ -14,7 +14,9 @@ def genOnName(name):
 
 EXPAND_METHOD = """
 #if $comment
--- ${comment}
+-- [$cmd] ${comment}
+#else
+-- [$cmd]
 #end if
 #set onName = $genOnName($method)
 local function ${onName}(proto)
@@ -26,7 +28,9 @@ end
 
 COLLAPSED_METHOD = """
 #if $comment
--- ${comment}
+-- [$cmd] ${comment}
+#else
+-- [$cmd]
 #end if
 #set onName = $genOnName($method)
 local function ${onName}(proto)
