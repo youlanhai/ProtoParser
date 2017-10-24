@@ -4,6 +4,7 @@ HEADER = """--
 -- this file is auto generate by ProtoParser tool.
 -- from $inputFile
 local $moduleName = loadprotobuf "$moduleName"
+local EMPTY_TABLE = {}
 """
 
 def genOnName(name):
@@ -22,7 +23,7 @@ local function ${onName}(data)
 
 	#set values = ["proto." + v for v in $fields]
 	#set argText = ", ".join($values)
-	return "${onName}", proto, {$argText}
+	return proto, {$argText}
 end
 """
 
@@ -35,7 +36,7 @@ local function ${onName}(data)
 	local proto = $moduleName.${className}()
 	proto:Parse(data)
 
-	return "${onName}", proto, {}
+	return proto, EMPTY_TABLE
 end
 """
 
@@ -43,7 +44,7 @@ RETURN = """
 return {
 #for cmd, fun in $functions
 	#set onName = $genOnName($fun)
-	[$cmd] = $onName,
+	[$cmd] = {"$onName", $onName},
 #end for
 }
 """

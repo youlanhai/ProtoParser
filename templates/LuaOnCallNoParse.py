@@ -20,7 +20,7 @@ EXPAND_METHOD = """
 local function ${onName}(proto)
 	#set values = ["proto." + v for v in $fields]
 	#set argText = ", ".join($values)
-	return "${onName}", proto, {$argText}
+	return proto, {$argText}
 end
 """
 
@@ -30,7 +30,7 @@ COLLAPSED_METHOD = """
 #end if
 #set onName = $genOnName($method)
 local function ${onName}(proto)
-	return "${onName}", proto, EMPTY_TABLE
+	return proto, EMPTY_TABLE
 end
 """
 
@@ -38,7 +38,7 @@ RETURN = """
 return {
 #for cmd, fun in $functions
 	#set onName = $genOnName($fun)
-	[$cmd] = $onName,
+	[$cmd] = {"$onName", $onName},
 #end for
 }
 """
