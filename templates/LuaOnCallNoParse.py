@@ -2,7 +2,7 @@
 
 HEADER = """--
 -- this file is auto generate by ProtoParser tool.
--- from $inputFile
+-- from $inputPath
 local $moduleName = loadprotobuf "$moduleName"
 local EMPTY_TABLE = {}
 """

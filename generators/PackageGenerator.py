@@ -7,7 +7,7 @@ class PackageGenerator(Generator):
 	''' 每个文件对应的包名
 	'''
 
-	def generate(self, inputFile, outputFile, module):
+	def generate(self, inputPath, outputPath, module):
 		packages = []
 		for fname, fd in module.files.iteritems():
 			packageName = fd.packageName
@@ -23,7 +23,7 @@ class PackageGenerator(Generator):
 		fmt = self.template.TEMPLATE
 		tpl = Template(fmt, searchList = [namespace, self])
 
-		with open(outputFile, "wb") as f:
+		with open(outputPath, "wb") as f:
 			f.write(str(tpl))
 
 		return
