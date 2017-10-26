@@ -5,39 +5,39 @@ from Cheetah.Template import Template
 from Generator import Generator
 
 class NormalGenerator(Generator):
-	''' 通用代码生成器
+	''' 通用代码生成器，针对单个输入文件，输出一个生成后的文件
 	'''
 
-	def __init__(self, generatorInfo):
+	def __init__(self, generatorInfo, exporter):
 		''' 生成器信息需要包含以下参数：
 			mode 	上下行模式。与message属性中的上下行模式一致。只有模式相同的属性，才会生成代码。因此，可以把mode看做是个生成代码的过滤器。
 			template 模板数据，描述了如何生成代码。template是templates目录下模块文件的名称。
 		'''
 
-		super(NormalGenerator, self).__init__(generatorInfo)
+		super(NormalGenerator, self).__init__(generatorInfo, exporter)
 
 		self.mode = generatorInfo["mode"]
 
-	def generate(self, inputFile, outputFile, fileDesc):
-		self.inputFile = inputFile
-		self.moduleName = os.path.splitext(os.path.basename(inputFile))[0]
-		self.fileDesc = fileDesc
+	def generate(self, inputPath, outputPath, fileDesc):
+		self.inputPath = inputPath
+		self.moduleName = os.path.splitext(os.path.basename(inputPath))[0]
 
+		# 记录函数列表
 		self.functions = []
 
-		with open(outputFile, "wb") as f:
+		with open(outputPath, "wb") as f:
 			self.stream = f
 
-			self.writeFileCodes(fileDesc)
+			self.writeFileCodes(fileDesc.codes)
 			self.writeReturn(self.functions)
 
 		return
 
-	def writeFileCodes(self, fileDesc):
+	def writeFileCodes(self, codes):
 		self.writeFileHeader()
 		self.writeNewLine()
 
-		for clsDesc in fileDesc.codes:
+		for clsDesc in codes:
 			if clsDesc.type == "message":
 				self.writeClassCodes(clsDesc)
 

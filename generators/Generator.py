@@ -7,9 +7,10 @@ NEW_LINE = "\n"
 # 代码生成器基类
 class Generator(object):
 
-	def __init__(self, generatorInfo):
+	def __init__(self, generatorInfo, exporter):
 		super(Generator, self).__init__()
 		self.generatorInfo = generatorInfo
+		self.exporter = exporter
 		self.stream = None
 		self.template = None
 
@@ -32,6 +33,6 @@ class Generator(object):
 	# 生成代码。
 	#@param inputFile 	输入文件路径
 	#@param outputFile 	输出文件路径
-	#@param fileDesc 	protobuf文件描述类
-	def generate(self, inputFile, outputFile, fileDesc):
+	#@param code 		protobuf文件描述类或者是模块
+	def generate(self, inputPath, outputPath, code):
 		pass
