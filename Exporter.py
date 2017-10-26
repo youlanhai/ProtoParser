@@ -51,6 +51,7 @@ class Exporter(object):
 		return
 
 	def parseFile(self, fileName, fileFullPath, outputPath):
+		fileName = fileName.replace('\\', '/')
 		fileDescriptor = self.module.getFileDescriptor(fileName)
 		if fileDescriptor is None:
 			fileDescriptor = self.module.newFileDescriptor(fileName, fileFullPath)

@@ -332,6 +332,7 @@ class PParser(object):
 		return
 
 	def loadIncludeFile(self, fileName, fullPath):
+		fileName = fileName.replace('\\', '/')
 		fd = self.module.files.get(fileName)
 		if fd:
 			if not self.fd.addInclude(fd):
