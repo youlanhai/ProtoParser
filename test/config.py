@@ -33,11 +33,6 @@ CODE_GENERATORS = [
 		"template" : "LuaOnCall",
 		"output" : "${OUTPUT_PATH}/${NAME}_dn_on.lua",
 	},
-	{
-		"class" : "ListGenerator",
-		"template" : "LuaList",
-		"output" : "${OUTPUT_PATH}/${NAME}_list.lua",
-	},
 ]
 
 #: 针对工程的生成器配置
@@ -46,5 +41,22 @@ PROJECT_GENERATORS = [
 		"class" : "PackageGenerator",
 		"template" : "LuaPackage",
 		"output" : "${OUTPUT_PATH}/${NAME}.lua",
-	}
+	},
+	{
+		"mode" : "up",
+		"class" : "MergedGenerator",
+		"template" : "LuaCall",
+		"output" : "${OUTPUT_PATH}/${NAME}_up_all.lua",
+	},
+	{
+		"mode" : "dn",
+		"class" : "MergedGenerator",
+		"template" : "LuaOnCall",
+		"output" : "${OUTPUT_PATH}/${NAME}_dn_all.lua",
+	},
+	{
+		"class" : "ListGenerator",
+		"template" : "LuaList",
+		"output" : "${OUTPUT_PATH}/${NAME}_list.lua",
+	},
 ]

@@ -4,6 +4,7 @@
 local common = loadprotobuf "common"
 
 
+-- [2]
 local function broadcastPosition(network, x, y, z)
 	local proto = common.Vector3()
 	proto.x = x
@@ -13,6 +14,7 @@ local function broadcastPosition(network, x, y, z)
 end
 
 
+-- [3]
 local function teleportTo(network, x, y, z)
 	local proto = common.Vector3()
 	proto.x = x
@@ -20,6 +22,7 @@ local function teleportTo(network, x, y, z)
 	proto.z = z
 	network:sendToAll(3, proto)
 end
+
 
 
 return {

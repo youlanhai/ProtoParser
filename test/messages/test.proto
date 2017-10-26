@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "common.proto";
+
+//@[up, sendTransform]
+//@[dn, onTransformChanged]
+message TransformChanged
+{
+	required Vector3 position = 1;
+	required Vector3 rotation = 2;
+}

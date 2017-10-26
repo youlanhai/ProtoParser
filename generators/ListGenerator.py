@@ -7,19 +7,20 @@ class ListGenerator(Generator):
 	''' 消息文件列表生成器。用于调试目的
 	'''
 
-	def generate(self, inputFile, outputFile, fileDesc):
+	def generate(self, inputFile, outputFile, module):
 		self.inputFile = inputFile
 		self.moduleName = os.path.splitext(os.path.basename(inputFile))[0]
-		self.fileDesc = fileDesc
 
+		ret = []
 		with open(outputFile, "wb") as f:
 			self.stream = f
 
-			self.writeMessageList(self.collectMessages(fileDesc))
+			for fileDesc in module.files.itervalues():
+				self.collectMessages(ret, fileDesc)
 
-	def collectMessages(self, fileDesc):
-		ret = []
+			self.writeMessageList(ret)
 
+	def collectMessages(self, ret, fileDesc):
 		for clsDesc in fileDesc.codes:
 			if clsDesc.type != "message": continue
 
@@ -29,11 +30,18 @@ class ListGenerator(Generator):
 				cmd = attr["cmd"]
 				method = attr["method"]
 				ret.append((cmd, mode, method, protoName))
-
-		return ret
+		return
 
 	def writeMessageList(self, messages):
-		namespace = {"messages" : messages}
+		split = {"up" : [], "dn" : []}
+		for msg in messages:
+			split[msg[1]].append(msg)
+
+		namespace = {
+			"messages" : messages,
+			"up_messages" : split["up"],
+			"dn_messages" : split["dn"],
+		}
 		
 		fmt = self.template.TEMPLATE
 		tpl = Template(fmt, searchList = [namespace, self])

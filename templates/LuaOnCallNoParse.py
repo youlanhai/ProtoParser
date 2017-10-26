@@ -39,6 +39,7 @@ end
 """
 
 RETURN = """
+$functions.sort(key = lambda x: x[0])
 return {
 #for cmd, fun in $functions
 	#set onName = $genOnName($fun)

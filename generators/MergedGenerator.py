@@ -10,25 +10,21 @@ class MergedGenerator(NormalGenerator):
 
 	def collectCodes(self, module):
 		codes = []
-		for fileDescriptor in module.files:
+		for fileDescriptor in module.files.itervalues():
 			codes.extend(fileDescriptor.codes)
 		return codes
 
 	def generate(self, inputPath, outputPath, module):
-		codes = self.exporter.get("codes")
-		if codes is None:
-			codes = self.collectCodes(module)
-			# 将代码缓存起来，方便再次生成时使用
-			self.exporter.codes = codes
-
 		self.inputPath = inputPath
-		self.moduleName = inputPath
 		self.functions = []
 
 		with open(outputPath, "wb") as f:
 			self.stream = f
 
-			self.writeFileCodes(codes)
+			for fileDescriptor in module.files.itervalues():
+				fileName = fileDescriptor.fileName
+				self.moduleName = os.path.splitext(os.path.basename(fileName))[0]
+				self.writeFileCodes(fileDescriptor.codes)
 			self.writeReturn(self.functions)
 
 		return

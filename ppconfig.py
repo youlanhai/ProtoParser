@@ -25,7 +25,7 @@ CODE_GENERATORS = [
 		"class" : "NormalGenerator",
 		"template" : "LuaCall",
 		"output" : "${OUTPUT_PATH}/${NAME}_dn.lua",
-	},
+	}
 ]
 
 #: 针对工程的生成器配置

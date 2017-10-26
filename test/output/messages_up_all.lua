@@ -1,6 +1,6 @@
 --
 -- this file is auto generate by ProtoParser tool.
--- from common
+-- from messages
 local common = loadprotobuf "common"
 
 
@@ -28,10 +28,25 @@ local function login(network, userName, password)
 	network:sendProto(1001, proto)
 end
 
+--
+-- this file is auto generate by ProtoParser tool.
+-- from messages
+local test = loadprotobuf "test"
+
+
+-- [6]
+local function sendTransform(network, position, rotation)
+	local proto = test.TransformChanged()
+	proto.position = position
+	proto.rotation = rotation
+	network:sendProto(6, proto)
+end
+
 
 
 return {
 	login = login,
 	sendPosition = sendPosition,
+	sendTransform = sendTransform,
 	setRotation = setRotation,
 }

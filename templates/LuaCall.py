@@ -39,6 +39,7 @@ end
 
 # args: functions
 RETURN = """
+$functions.sort(key = lambda x: x[1])
 return {
 #for cmd, fun in $functions
 	$fun = $fun,
