@@ -105,9 +105,10 @@ class ClassDescriptor(IType):
 class FileDescriptor(IType):
 	''' 协议文件
 	'''
-	def __init__(self, fileName):
+	def __init__(self, fileName, fullPath):
 		super(FileDescriptor, self).__init__(fileName, "file")
 		self.fileName = fileName
+		self.fullPath = fullPath
 		self.includes = []
 		self.packageName = None
 		self.syntax = "proto2";
@@ -156,10 +157,13 @@ class Module(object):
 	def isFileParsed(self, fileName):
 		return fileName in self.files
 
-	def newFileDescriptor(self, fileName):
+	def getFileDescriptor(self, fileName):
+		return self.files.get(fileName)
+
+	def newFileDescriptor(self, fileName, fullPath):
 		assert(fileName not in self.files)
 
-		fd = FileDescriptor(fileName)
+		fd = FileDescriptor(fileName, fullPath)
 		self.files[fileName] = fd
 		return fd
 
@@ -176,6 +180,7 @@ class Module(object):
 				return fullPath
 
 		return None
+
 
 ATTR_KEYS = ["mode", "cmd", "method"]
 

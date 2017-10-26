@@ -35,28 +35,31 @@ class Exporter(object):
 		self.generateCode(ppconfig.PROJECT_GENERATORS, self.module, namespace)
 
 	def parseInPath(self, inputPath):
+		inputPath = os.path.normpath(inputPath)
 		self.module.searchPath.append(inputPath)
 
-		files = os.listdir(inputPath)
-		for fname in files:
-			name, ext = os.path.splitext(fname)
-			if ext != ".proto": continue
+		splitPos = len(inputPath) + 1
+		for root, dirs, files in os.walk(inputPath):
+			for fname in files:
+				name, ext = os.path.splitext(fname)
+				if ext != ".proto": continue
 
-			srcFullPath = os.path.join(inputPath, fname)
-			self.parseFile(name, srcFullPath, ppconfig.OUTPUT_PATH)
+				srcFullPath = os.path.join(root, fname)
+				relativePath = os.path.join(root[splitPos:], fname)
 
+				self.parseFile(relativePath, srcFullPath, ppconfig.OUTPUT_PATH)
 		return
 
-	def parseFile(self, name, srcPath, outputPath):
-		fileDescriptor = self.module.files.get(srcPath)
+	def parseFile(self, fileName, fileFullPath, outputPath):
+		fileDescriptor = self.module.getFileDescriptor(fileName)
 		if fileDescriptor is None:
-			pa = PParser(self.module, srcPath)
+			fileDescriptor = self.module.newFileDescriptor(fileName, fileFullPath)
+			pa = PParser(self.module, fileDescriptor)
 			pa.parse()
-			fileDescriptor = pa.fd
 
 		namespace = {
-			"NAME" : name,
-			"SOURCE_FILE" : srcPath,
+			"NAME" : os.path.splitext(fileName)[0],
+			"SOURCE_FILE" : fileFullPath,
 			"OUTPUT_PATH" : outputPath,
 		}
 

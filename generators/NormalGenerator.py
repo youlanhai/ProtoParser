@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 from Cheetah.Template import Template
 
 from Generator import Generator
@@ -19,8 +20,8 @@ class NormalGenerator(Generator):
 		self.mode = generatorInfo["mode"]
 
 	def generate(self, inputPath, outputPath, fileDesc):
-		self.inputPath = inputPath
-		self.moduleName = os.path.splitext(os.path.basename(inputPath))[0]
+		self.fileName = os.path.splitext(inputPath)[0]
+		self.moduleName = "_".join(re.split(r"\W+", self.fileName))
 
 		# 记录函数列表
 		self.functions = []

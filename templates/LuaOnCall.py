@@ -2,8 +2,8 @@
 
 HEADER = """--
 -- this file is auto generate by ProtoParser tool.
--- from $inputPath
-local $moduleName = loadprotobuf "$moduleName"
+-- from $fileName
+local $moduleName = loadprotobuf "$fileName"
 local EMPTY_TABLE = {}
 """
 
@@ -49,7 +49,7 @@ $functions.sort(key = lambda x: x[0])
 return {
 #for cmd, fun in $functions
 	#set onName = $genOnName($fun)
-	[$cmd] = {"$onName", $onName,}
+	[$cmd] = {"$onName", $onName,},
 #end for
 }
 """

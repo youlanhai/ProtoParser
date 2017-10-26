@@ -2,8 +2,8 @@
 
 HEADER = """--
 -- this file is auto generate by ProtoParser tool.
--- from $inputPath
-local $moduleName = loadprotobuf "$moduleName"
+-- from $fileName
+local $moduleName = loadprotobuf "$fileName"
 """
 
 # args:  fields, method, moduleName, className, send, cmd

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import re
 from Cheetah.Template import Template
 
 from NormalGenerator import NormalGenerator
@@ -22,8 +23,9 @@ class MergedGenerator(NormalGenerator):
 			self.stream = f
 
 			for fileDescriptor in module.files.itervalues():
-				fileName = fileDescriptor.fileName
-				self.moduleName = os.path.splitext(os.path.basename(fileName))[0]
+				fileName = os.path.splitext(fileDescriptor.fileName)[0]
+				self.fileName = fileName
+				self.moduleName = "_".join(re.split(r"\W+", fileName))
 				self.writeFileCodes(fileDescriptor.codes)
 			self.writeReturn(self.functions)
 

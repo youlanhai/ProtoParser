@@ -38,10 +38,10 @@ class TokenInfo:
 class PParser(object):
 	''' 语法分析器
 	'''
-	def __init__(self, module, fileName):
+	def __init__(self, module, fd):
 		super(PParser, self).__init__()
 		self.module = module
-		self.fd = self.module.newFileDescriptor(fileName)
+		self.fd = fd
 		self.lexer = None
 
 		self.lastAttributes = []
@@ -67,7 +67,7 @@ class PParser(object):
 	def parse(self):
 		print "parse:", self.fd.fileName
 
-		with open(self.fd.fileName, "r") as f:
+		with open(self.fd.fullPath, "r") as f:
 			self.lexer = PLexer.PLexer(f.read(), self.fd.fileName)
 
 		tokenHandler = {
@@ -313,23 +313,34 @@ class PParser(object):
 		self.matchToken(token, PLexer.T_STRING, desc)
 		fname = self.tokenInfo.value
 
+		fileName = None
+		fullPath = None
 
-		fullPath = self.module.findFileFullPath(fname)
+		curPath = os.path.dirname(self.fd.fileName)
+		if len(curPath) > 0:
+			fileName = os.path.join(curPath, fname)
+			fullPath = self.module.findFileFullPath(fileName)
+
+		if fullPath is None:
+			fileName = fname
+			fullPath = self.module.findFileFullPath(fileName)
+
 		if fullPath is None:
 			raise RuntimeError, "import: Failed find file '%s'" % fname
 
-		self.loadIncludeFile(fname, fullPath)
+		self.loadIncludeFile(fileName, fullPath)
 		return
 
-	def loadIncludeFile(self, name, fullPath):
-		fd = self.module.files.get(fullPath)
+	def loadIncludeFile(self, fileName, fullPath):
+		fd = self.module.files.get(fileName)
 		if fd:
 			if not self.fd.addInclude(fd):
-				self.error("import", "loop include '%s'" % name)
+				self.error("import", "loop include '%s'" % fileName)
 		else:
-			pa = PParser(self.module, fullPath)
+			fd = self.module.newFileDescriptor(fileName, fullPath)
+			pa = PParser(self.module, fd)
 			if not self.fd.addInclude(pa.fd):
-				self.error("import", "loop include '%s'" % name)
+				self.error("import", "loop include '%s'" % fileName)
 
 			pa.parse()
 		return
