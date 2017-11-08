@@ -22,7 +22,10 @@ class MergedGenerator(NormalGenerator):
 		with open(outputPath, "wb") as f:
 			self.stream = f
 
-			for fileDescriptor in module.files.itervalues():
+			keys = module.files.keys()
+			keys.sort()
+			for key in keys:
+				fileDescriptor = module.files[key]
 				fileName = os.path.splitext(fileDescriptor.fileName)[0]
 				self.fileName = fileName
 				self.moduleName = "_".join(re.split(r"\W+", fileName))
