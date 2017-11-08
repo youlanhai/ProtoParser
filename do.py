@@ -2,6 +2,7 @@
 import os
 import imp
 from argparse import ArgumentParser
+from cores.PLexer import ProtoException
 
 try:
 	import Cheetah
@@ -44,8 +45,10 @@ def main():
 	ppconfig.OUTPUT_PATH = option.output if option.output else "output"
 
 	exporter = Exporter()
-	exporter.run(option)
-
+	try:
+		exporter.run(option)
+	except ProtoException, msg:
+		print "\n**%s\n" % msg
 
 if __name__ == "__main__":
 	main()

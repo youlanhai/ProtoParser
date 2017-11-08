@@ -67,6 +67,8 @@ def token2str(tk):
 def is_keyword_token(tk):
 	return tk in KEYWORD_TOKENS
 
+class ProtoException(Exception):
+	pass
 
 # 词法分析器
 class PLexer(object):
@@ -257,7 +259,7 @@ class PLexer(object):
 	def error(self, msg):
 		self.isError = True
 		msg = "error: file '%s', line=%d, column=%d, %s" % (self.fileName, self.line, self.column, msg)
-		raise RuntimeError, msg
+		raise ProtoException, msg
 
 	def readNumber(self):
 		ret = []
