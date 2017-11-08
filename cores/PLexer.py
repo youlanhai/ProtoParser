@@ -24,6 +24,7 @@ T_EXTENSIONS = 274
 T_RESERVED 	= 275
 T_TO 		= 276
 T_EXTEND 	= 277
+T_MAP 		= 278
 
 KEYWORDS = {
 	"message" 	: T_MESSAGE,
@@ -41,6 +42,7 @@ KEYWORDS = {
 	"reserved" 	: T_RESERVED,
 	"to" 		: T_TO,
 	"extend" 	: T_EXTEND,
+	"map"		: T_MAP,
 }
 
 KEYWORD_TOKENS = set([tk for tk in KEYWORDS.itervalues()])

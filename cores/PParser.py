@@ -148,7 +148,10 @@ class PParser(object):
 				self.parse_option(cls)
 
 			elif token in VALID_QUALIFIER_TOKENS:
-				self._parseMessageVarFiled(cls, desc)
+				self._parseMessageVarField(cls, desc)
+
+			elif token == PLexer.T_MAP:
+				self._parseMessageMapField(cls, desc)
 
 			elif token == PLexer.T_EXTENSIONS:
 				self._parseExtensions(cls)
@@ -160,7 +163,7 @@ class PParser(object):
 				self.parse_extend(parent = cls)
 
 			else:
-				self.error(desc, "invalid token %s" % token2str(token))
+				self.error(desc, "invalid token '%s'" % token2str(token))
 
 			token = self.nextToken()
 
@@ -169,19 +172,13 @@ class PParser(object):
 
 		cls.setAttributes(attributes)
 
-	def _parseMessageVarFiled(self, cls, desc):
+	def _parseMessageVarField(self, cls, desc):
 		token = self.tokenInfo.token
 
 		varQualifier = token2str(token)
 		varType = self._parseFullIdentity(desc)
 
 		varTemplateArgs = None
-		varName = None
-
-		token = self.lookAhead()
-		if token == '<':
-			varTemplateArgs = self._parseTemplateArgs(desc)
-
 		varName = self._parseIdentity(desc)
 
 		self.matchNext('=', desc)
@@ -195,6 +192,18 @@ class PParser(object):
 
 		self.matchNext(';', desc)
 		cls.addMember(varOrder, varQualifier, varName, varType, varTemplateArgs)
+
+	def _parseMessageMapField(self, cls, desc):
+		self.matchNext('<', desc)
+		varTemplateArgs = self._parseTemplateArgs(desc)
+		varName = self._parseIdentity(desc)
+		self.matchNext('=', desc)
+
+		self.matchNext(PLexer.T_NUMBER, desc)
+		varOrder = self.tokenInfo.value
+		self.matchNext(';', desc)
+
+		cls.addMember(varOrder, "optional", varName, "map", varTemplateArgs)
 
 	def _parseFiledOption(self, desc):
 		self.nextToken() # ignore '['
@@ -353,7 +362,6 @@ class PParser(object):
 		'''
 		ret = []
 
-		self.nextToken() # ignore '<'
 		while True:
 			varType = self._parseFullIdentity(desc)
 			ret.append(varType)
