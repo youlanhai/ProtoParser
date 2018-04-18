@@ -21,7 +21,8 @@ EXPAND_METHOD = """
 #set onName = $genOnName($method)
 local function ${onName}(data)
 	local proto = $moduleName.${className}()
-	proto:Parse(data)
+	local ok, msg = proto:Parse(data)
+	if not ok then return nil, msg end
 
 	#set values = ["proto." + v for v in $fields]
 	#set argText = ", ".join($values)
@@ -38,7 +39,8 @@ COLLAPSED_METHOD = """
 #set onName = $genOnName($method)
 local function ${onName}(data)
 	local proto = $moduleName.${className}()
-	proto:Parse(data)
+	local ok, msg = proto:Parse(data)
+	if not ok then return nil, msg end
 
 	return proto, EMPTY_TABLE
 end
