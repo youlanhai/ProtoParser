@@ -29,23 +29,39 @@ class NormalGenerator(Generator):
 		with open(outputPath, "wb") as f:
 			self.stream = f
 
+			self.writeHeader()
+			self.writeNewLine()
+
 			self.writeFileCodes(fileDesc.codes)
+
 			self.writeReturn(self.functions)
 
 		return
 
 	def writeFileCodes(self, codes):
-		self.writeFileHeader()
-		self.writeNewLine()
+		self.writeFileBegin()
 
 		for clsDesc in codes:
 			if clsDesc.type == "message":
 				self.writeClassCodes(clsDesc)
 
-	def writeFileHeader(self):
-		fmt = self.template.HEADER
+		self.writeFileEnd()
+
+	def writeFileBegin(self):
+		fmt = getattr(self.template, "BEGIN", None)
+		if not fmt: return
+
 		tpl = Template(fmt, searchList = [self])
 		self.stream.write(str(tpl))
+		self.writeNewLine()
+
+	def writeFileEnd(self):
+		fmt = getattr(self.template, "END", None)
+		if not fmt: return
+
+		tpl = Template(fmt, searchList = [self])
+		self.stream.write(str(tpl))
+		self.writeNewLine()
 
 	def writeClassCodes(self, clsDesc):
 		for attr in clsDesc.attributes:
@@ -80,8 +96,17 @@ class NormalGenerator(Generator):
 		self.stream.write(str(tpl))
 
 
+	def writeHeader(self):
+		fmt = getattr(self.template, "HEADER", None)
+		if not fmt: return
+		
+		tpl = Template(fmt, searchList = [self])
+		self.stream.write(str(tpl))
+
 	def writeReturn(self, functions):
+		fmt = getattr(self.template, "RETURN", None)
+		if not fmt: return
+
 		namespace = {"functions" : functions}
-		fmt = self.template.RETURN
 		tpl = Template(fmt, searchList = [namespace, self, self.template])
 		self.stream.write(str(tpl))

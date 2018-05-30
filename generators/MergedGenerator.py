@@ -22,6 +22,7 @@ class MergedGenerator(NormalGenerator):
 		with open(outputPath, "wb") as f:
 			self.stream = f
 
+			self.writeHeader()
 			keys = module.files.keys()
 			keys.sort()
 			for key in keys:

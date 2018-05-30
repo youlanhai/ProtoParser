@@ -44,6 +44,6 @@ class ListGenerator(Generator):
 		}
 		
 		fmt = self.template.TEMPLATE
-		tpl = Template(fmt, searchList = [namespace, self])
+		tpl = Template(fmt, searchList = [namespace, self, self.template])
 		self.stream.write(str(tpl))
 

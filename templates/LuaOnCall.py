@@ -1,25 +1,24 @@
 # -*- coding: utf-8 -*-
+from LuaCommon import genOnName
 
 HEADER = """--
 -- this file is auto generate by ProtoParser tool.
--- from $fileName
-local $moduleName = loadprotobuf "$fileName"
 local EMPTY_TABLE = {}
+local Module = {}
 """
 
-def genOnName(name):
-	if name.startswith("on"):
-		return name
-	return "on" + name[0].upper() + name[1:]
+BEGIN = """
+-- from $fileName
+local $moduleName = loadprotobuf "$fileName"
+"""
 
 EXPAND_METHOD = """
 #if $comment
--- [$cmd] ${comment}
-#else
--- [$cmd]
+-- ${comment}
 #end if
 #set onName = $genOnName($method)
-local function ${onName}(data)
+-- ${onName}
+Module[$cmd] = function(data)
 	local proto = $moduleName.${className}()
 	local ok, msg = proto:Parse(data)
 	if not ok then return nil, msg end
@@ -32,12 +31,11 @@ end
 
 COLLAPSED_METHOD = """
 #if $comment
--- [$cmd] ${comment}
-#else
--- [$cmd]
+-- ${comment}
 #end if
 #set onName = $genOnName($method)
-local function ${onName}(data)
+-- ${onName}
+Module[$cmd] = function(data)
 	local proto = $moduleName.${className}()
 	local ok, msg = proto:Parse(data)
 	if not ok then return nil, msg end
@@ -47,11 +45,5 @@ end
 """
 
 RETURN = """
-$functions.sort(key = lambda x: x[0])
-return {
-#for cmd, fun in $functions
-	#set onName = $genOnName($fun)
-	[$cmd] = {"$onName", $onName,},
-#end for
-}
+return Module
 """

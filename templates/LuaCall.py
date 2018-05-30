@@ -2,6 +2,10 @@
 
 HEADER = """--
 -- this file is auto generate by ProtoParser tool.
+local Network = {}
+"""
+
+BEGIN = """
 -- from $fileName
 local $moduleName = loadprotobuf "$fileName"
 """
@@ -13,16 +17,13 @@ EXPAND_METHOD = """
 #else
 -- [$cmd]
 #end if
-#set argText = "network"
-#if len($fields) > 0
-#set argText = $argText + ", " + ", ".join($fields)
-#end if
-local function ${method}($argText)
+#set argText = ", ".join($fields)
+function Network:${method}($argText)
 	local proto = $moduleName.${className}()
 #for field in $fields
 	proto.$field = $field
 #end for
-	network:${send}($cmd, proto)
+	self:${send}($cmd, proto)
 end
 """
 
@@ -32,17 +33,12 @@ COLLAPSED_METHOD = """
 #else
 -- [$cmd]
 #end if
-local function ${method}(network, proto)
-	network:${send}($cmd, proto)
+function Network:${method}(proto)
+	self:${send}($cmd, proto)
 end
 """
 
 # args: functions
 RETURN = """
-$functions.sort(key = lambda x: x[1])
-return {
-#for cmd, fun in $functions
-	$fun = $fun,
-#end for
-}
+return Network
 """
