@@ -23,7 +23,7 @@ function Network:${method}($argText)
 #for field in $fields
 	proto.$field = $field
 #end for
-	self:${send}($cmd, proto)
+	return self:${send}($cmd, proto)
 end
 """
 
@@ -34,7 +34,7 @@ COLLAPSED_METHOD = """
 -- [$cmd]
 #end if
 function Network:${method}(proto)
-	self:${send}($cmd, proto)
+	return self:${send}($cmd, proto)
 end
 """
 
