@@ -19,9 +19,13 @@ class NormalGenerator(Generator):
 
 		self.mode = generatorInfo["mode"]
 
-	def generate(self, inputPath, outputPath, fileDesc):
+	def generate(self, inputPath, outputPath, fileDescriptor):
+		self.fileDescriptor = fileDescriptor
 		self.fileName = os.path.splitext(inputPath)[0]
 		self.moduleName = "_".join(re.split(r"\W+", self.fileName))
+		# self.packagePrefix = ""
+		# if fileDescriptor.packageName:
+		# 	self.packagePrefix = fileDescriptor.packageName + "."
 
 		# 记录函数列表
 		self.functions = []
@@ -32,7 +36,7 @@ class NormalGenerator(Generator):
 			self.writeHeader()
 			self.writeNewLine()
 
-			self.writeFileCodes(fileDesc.codes)
+			self.writeFileCodes(fileDescriptor.codes)
 
 			self.writeReturn(self.functions)
 
@@ -74,6 +78,8 @@ class NormalGenerator(Generator):
 
 	def genMethodNamespace(self, attr, clsDesc):
 		return {
+			"fileDescriptor" : self.fileDescriptor,
+			"classDescriptor" : clsDesc,
 			"fields" : [member.name for member in clsDesc.members],
 			"moduleName" : self.moduleName,
 			"className" : clsDesc.name,

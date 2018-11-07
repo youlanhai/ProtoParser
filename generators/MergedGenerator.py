@@ -26,11 +26,10 @@ class MergedGenerator(NormalGenerator):
 			keys = module.files.keys()
 			keys.sort()
 			for key in keys:
-				fileDescriptor = module.files[key]
-				fileName = os.path.splitext(fileDescriptor.fileName)[0]
-				self.fileName = fileName
-				self.moduleName = "_".join(re.split(r"\W+", fileName))
-				self.writeFileCodes(fileDescriptor.codes)
+				self.fileDescriptor = module.files[key]
+				self.fileName = os.path.splitext(self.fileDescriptor.fileName)[0]
+				self.moduleName = "_".join(re.split(r"\W+", self.fileName))
+				self.writeFileCodes(self.fileDescriptor.codes)
 			self.writeReturn(self.functions)
 
 		return
