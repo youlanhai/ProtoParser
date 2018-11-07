@@ -12,11 +12,15 @@ class Generator(object):
 		self.generatorInfo = generatorInfo
 		self.exporter = exporter
 		self.stream = None
-		self.template = None
+		self.template = self.getTemplate()
 
-		tplName = generatorInfo.get("template")
-		if tplName:
-			self.template = getattr(templates, tplName)
+	def getTemplate(self):
+		template = self.generatorInfo.get("template")
+
+		if isinstance(template, str):
+			return getattr(templates, template)
+		
+		return template
 
 	def write(self, indent, *args):
 		if indent > 0: self.stream.write(INDENT_CHAR * indent)

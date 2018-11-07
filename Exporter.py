@@ -69,7 +69,9 @@ class Exporter(object):
 
 	def generateCode(self, generatorInfos, code, namespace):
 		for generatorInfo in generatorInfos:
-			cls = getattr(generators, generatorInfo["class"])
+			className = generatorInfo["class"]
+			cls = getattr(generators, className) if isinstance(className, str) else className
+
 			generator = cls(generatorInfo, self)
 
 			dstPath = generatorInfo["output"]

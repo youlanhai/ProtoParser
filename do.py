@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 import os
 import imp
+import sys
 from argparse import ArgumentParser
 from cores.PLexer import ProtoException
 
@@ -19,6 +20,8 @@ def parse_config(path):
 
 	if not os.path.exists(path):
 		raise RuntimeError, "the configure file '%s' doesn't exist" % path
+
+	sys.path.insert(0, os.path.dirname(path))
 
 	cfg = imp.load_source("custom_configure", path)
 	for k, v in cfg.__dict__.iteritems():
