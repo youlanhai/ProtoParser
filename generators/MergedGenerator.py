@@ -17,7 +17,6 @@ class MergedGenerator(NormalGenerator):
 
 	def generate(self, inputPath, outputPath, module):
 		self.inputPath = inputPath
-		self.functions = []
 
 		with open(outputPath, "wb") as f:
 			self.stream = f
@@ -30,6 +29,5 @@ class MergedGenerator(NormalGenerator):
 				self.fileName = os.path.splitext(self.fileDescriptor.fileName)[0]
 				self.moduleName = "_".join(re.split(r"\W+", self.fileName))
 				self.writeFileCodes(self.fileDescriptor.codes)
-			self.writeReturn(self.functions)
 
 		return

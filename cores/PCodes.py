@@ -70,6 +70,10 @@ class ClassDescriptor(IType):
 		self.members.append(member)
 
 	def setAttributes(self, attributes):
+		for attr in attributes:
+			if "cmd" not in attr.attributes:
+				attr.attributes["cmd"] = attr.id
+
 		cmd = self.getOption("protoType")
 		if cmd is not None:
 			for attr in attributes:

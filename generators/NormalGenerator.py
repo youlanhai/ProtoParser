@@ -27,9 +27,6 @@ class NormalGenerator(Generator):
 		# if fileDescriptor.packageName:
 		# 	self.packagePrefix = fileDescriptor.packageName + "."
 
-		# 记录函数列表
-		self.functions = []
-
 		with open(outputPath, "wb") as f:
 			self.stream = f
 
@@ -38,7 +35,7 @@ class NormalGenerator(Generator):
 
 			self.writeFileCodes(fileDescriptor.codes)
 
-			self.writeReturn(self.functions)
+			self.writeReturn()
 
 		return
 
@@ -74,8 +71,6 @@ class NormalGenerator(Generator):
 			self.writeCallMethod(attr, clsDesc)
 			self.writeNewLine()
 
-			self.functions.append((attr["cmd"], attr["method"]))
-
 	def genMethodNamespace(self, attr, clsDesc):
 		return {
 			"fileDescriptor" : self.fileDescriptor,
@@ -85,7 +80,7 @@ class NormalGenerator(Generator):
 			"className" : clsDesc.name,
 			"send" 		: attr.get("send", "sendProto"),
 			"cmd" 		: attr["cmd"],
-			"method" 	: attr["method"],
+			"method" 	: attr.get("method"),
 			"comment" 	: clsDesc.getOption("comment"),
 		}
 
@@ -109,10 +104,9 @@ class NormalGenerator(Generator):
 		tpl = Template(fmt, searchList = [self])
 		self.stream.write(str(tpl))
 
-	def writeReturn(self, functions):
+	def writeReturn(self):
 		fmt = getattr(self.template, "RETURN", None)
 		if not fmt: return
 
-		namespace = {"functions" : functions}
 		tpl = Template(fmt, searchList = [namespace, self, self.template])
 		self.stream.write(str(tpl))
