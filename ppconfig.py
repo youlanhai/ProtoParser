@@ -33,5 +33,11 @@ PROJECT_GENERATORS = []
 
 MAX_EXPAND_ARGS = 5
 
+#: 上下行方法前缀
+METHOD_PREFIX = {
+	"up" : "cmd",
+	"dn" : "onCmd",
+}
+
 def custom_init():
 	pass

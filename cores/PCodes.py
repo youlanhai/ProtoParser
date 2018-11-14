@@ -13,25 +13,15 @@ class Member(object):
 		self.template = template
 		self.qualifier = qualifier
 
-
-class EnumDescriptor(object):
-	def __init__(self, name, parent = None):
-		self.name = name
-		self.parent = parent
-		self.type = "enum"
-		self.fields = {}
-
-	def addField(self, key, value):
-		self.fields[key] = value
-
-
 class IType(object):
 	def __init__(self, name, type):
 		super(IType, self).__init__()
 		self.name = name
 		self.type = type
+		# 内嵌代码和类型
 		self.codes = []
 		self.types = {}
+		# 类型描述信息
 		self.options = {}
 
 	def addOption(self, name, value):
@@ -56,6 +46,17 @@ class IType(object):
 		return self.getType(name)
 
 
+class EnumDescriptor(IType):
+	''' 枚举类
+	'''
+	def __init__(self, name, parent = None):
+		super(EnumDescriptor, self).__init__(name, "enum")
+		self.parent = parent
+		self.fields = {}
+
+	def addField(self, key, value):
+		self.fields[key] = value
+
 class ClassDescriptor(IType):
 	''' 消息类
 	'''
@@ -72,7 +73,7 @@ class ClassDescriptor(IType):
 	def setAttributes(self, attributes):
 		for attr in attributes:
 			if "cmd" not in attr.attributes:
-				attr.attributes["cmd"] = attr.id
+				attr.updatePairValue("cmd", attr.id)
 
 		cmd = self.getOption("protoType")
 		if cmd is not None:
@@ -88,16 +89,19 @@ class ClassDescriptor(IType):
 				{
 					"mode" : "up",
 					"cmd" : cmd,
-					"method" : "cmd" + self.name,
 					"expand" : expand,
 				},
 				{
 					"mode" : "dn",
 					"cmd" : cmd,
-					"method" : "onCmd" + self.name,
 					"expand" : expand,
 				},
 			]
+
+		for attr in self.attributes:
+			if "method" not in attr:
+				mode = attr["mode"]
+				attr["method"] = ppconfig.METHOD_PREFIX.get(mode, "") + self.name
 
 	def findType(self, name):
 		try:
@@ -204,7 +208,7 @@ class Attribute(object):
 		''' 添加值属性。会根据索引位置，自动转换成键-值对格式
 		'''
 		if self.index >= len(ATTR_KEYS):
-			raise ValueError, "无效的属性 %s" % str(value)
+			raise ValueError, "invliad attribute: %s" % str(value)
 
 		# 如果未指定协议号，则自动生成
 		if self.index == 1 and isinstance(value, str):
