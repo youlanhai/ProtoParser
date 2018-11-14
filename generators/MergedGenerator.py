@@ -29,5 +29,6 @@ class MergedGenerator(NormalGenerator):
 				self.fileName = os.path.splitext(self.fileDescriptor.fileName)[0]
 				self.moduleName = "_".join(re.split(r"\W+", self.fileName))
 				self.writeFileCodes(self.fileDescriptor.codes)
-
+				
+			self.writeReturn()
 		return

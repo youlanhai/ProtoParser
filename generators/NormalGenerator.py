@@ -108,5 +108,5 @@ class NormalGenerator(Generator):
 		fmt = getattr(self.template, "RETURN", None)
 		if not fmt: return
 
-		tpl = Template(fmt, searchList = [namespace, self, self.template])
+		tpl = Template(fmt, searchList = [self, self.template])
 		self.stream.write(str(tpl))
