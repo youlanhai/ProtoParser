@@ -131,6 +131,9 @@ class PParser(object):
 			cls = PCodes.ClassDescriptor(name, parent)
 			parent.addType(cls)
 
+			config = self.module.getMessageConfig(cls.fullName)
+			cls.setCustomConfig(config)
+
 		self.matchNext('{', desc)
 
 		token = self.nextToken()

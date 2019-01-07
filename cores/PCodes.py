@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 import os
 import ppconfig
+import json
 
 class Member(object):
 	''' 消息的成员变量
@@ -23,6 +24,10 @@ class IType(object):
 		self.types = {}
 		# 类型描述信息
 		self.options = {}
+
+	@property
+	def fullName(self):
+		return self.name
 
 	def addOption(self, name, value):
 		self.options[name] = value
@@ -53,6 +58,13 @@ class EnumDescriptor(IType):
 		super(EnumDescriptor, self).__init__(name, "enum")
 		self.parent = parent
 		self.fields = {}
+	
+	@property
+	def fullName(self):
+		if self._fullName is None:
+			parentName = self.parent.fullName
+			self._fullName = parentName + "." + self.name if parentName else self.name
+		return self._fullName
 
 	def addField(self, key, value):
 		self.fields[key] = value
@@ -65,26 +77,38 @@ class ClassDescriptor(IType):
 		self.parent = parent
 		self.members = []
 		self.attributes = []
+		self._fullName = None
+		self.customConfig = {}
+
+	@property
+	def fullName(self):
+		if self._fullName is None:
+			parentName = self.parent.fullName
+			self._fullName = parentName + "." + self.name if parentName else self.name
+		return self._fullName
 
 	def addMember(self, varOrder, varQualifier, varName, varType, varTemplateArgs):
 		member = Member(varOrder, varQualifier, varName, varType, varTemplateArgs)
 		self.members.append(member)
 
 	def setAttributes(self, attributes):
+		# 从协议属性中提取协议号
+		cmd = self.getOption(ppconfig.CMD_OPTION_NAME)
+		# 未指定协议号的，自动分配协议号id
 		for attr in attributes:
 			if "cmd" not in attr.attributes:
-				attr.updatePairValue("cmd", attr.id)
-
-		cmd = self.getOption("protoType")
-		if cmd is not None:
-			for attr in attributes:
-				if attr.isAutoCMD:
-					attr.updatePairValue("cmd", cmd)
+				attr.updatePairValue("cmd", cmd or attr.id)
 
 		if len(attributes) > 0:
 			self.attributes = [attr.attributes for attr in attributes]
 		elif cmd is not None:
-			expand = len(self.members) <= ppconfig.MAX_EXPAND_ARGS
+			# 从配置中读取展开状态，避免修改参数后，函数声明格式发生变化
+			expand = self.customConfig.get("expand")
+			if expand is None:
+				expand = len(self.members) <= ppconfig.MAX_EXPAND_ARGS
+				self.customConfig["expand"] = expand
+				
+			# 自动生成属性
 			self.attributes = [
 				{
 					"mode" : "up",
@@ -109,6 +133,9 @@ class ClassDescriptor(IType):
 		except:
 			return self.parent.findType(name)
 
+	def setCustomConfig(self, config):
+		self.customConfig = config
+
 
 class FileDescriptor(IType):
 	''' 协议文件
@@ -120,6 +147,10 @@ class FileDescriptor(IType):
 		self.includes = []
 		self.packageName = None
 		self.syntax = "proto2";
+
+	@property
+	def fullName(self):
+		return self.packageName
 
 	def addInclude(self, fd):
 		if fd.isFDExist(self): return False #循环包含
@@ -161,6 +192,7 @@ class Module(object):
 		self.files = {}
 		self.searchPath = []
 		self.attrIDCounter = attrIDCounter
+		self.configCache = {}
 
 	def isFileParsed(self, fileName):
 		return fileName in self.files
@@ -188,6 +220,21 @@ class Module(object):
 				return fullPath
 
 		return None
+
+	def getMessageConfig(self, name):
+		return self.configCache.setdefault(name, {})
+
+	def loadConfigCache(self, filePath):
+		try:
+			with open(filePath, "r") as f:
+				self.configCache = json.load(f)
+		except Exception, e:
+			print e
+			self.configCache = {}
+
+	def saveConfigCache(self, filePath):
+		with open(filePath, "w") as f:
+			json.dump(self.configCache, f, indent = 4, sort_keys = True)
 
 
 ATTR_KEYS = ["mode", "cmd", "method"]

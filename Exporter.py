@@ -8,6 +8,13 @@ import generators
 from cores import PCodes
 from cores.PParser import PParser
 
+def create_folder(folder, recreate = False):
+	if os.path.exists(folder):
+		if recreate:
+			shutil.rmtree(folder)
+			os.mkdir(folder)
+	else:
+		os.mkdir(folder)
 
 class Exporter(object):
 	
@@ -17,22 +24,21 @@ class Exporter(object):
 		outputPath = ppconfig.OUTPUT_PATH
 		inputPath = ppconfig.INPUT_PATH
 
-		if os.path.exists(outputPath):
-			if option.force:
-				shutil.rmtree(outputPath)
-				os.mkdir(outputPath)
-		else:
-			os.mkdir(outputPath)
-
-		self.module = PCodes.Module()
-		self.parseInPath(inputPath)
-
 		namespace = {
 			"NAME" : os.path.basename(inputPath),
 			"SOURCE_FILE" : inputPath,
 			"OUTPUT_PATH" : outputPath,
 		}
+		configCachePath = str(Template(ppconfig.MESSAGE_CONFIG_CACHE_FILE, searchList = [namespace, ppconfig]))
+
+		self.module = PCodes.Module()
+		self.module.loadConfigCache(configCachePath)
+
+		create_folder(outputPath, option.force)
+		self.parseInPath(inputPath)
+
 		self.generateCode(ppconfig.PROJECT_GENERATORS, self.module, namespace)
+		self.module.saveConfigCache(configCachePath)
 
 	def parseInPath(self, inputPath):
 		inputPath = os.path.normpath(inputPath)
@@ -75,7 +81,7 @@ class Exporter(object):
 			generator = cls(generatorInfo, self)
 
 			dstPath = generatorInfo["output"]
-			dstPath = str(Template(dstPath, searchList = [namespace, ]))
+			dstPath = str(Template(dstPath, searchList = [namespace, ppconfig]))
 			generator.generate(namespace["NAME"], dstPath, code)
 
 		return

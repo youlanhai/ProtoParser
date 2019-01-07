@@ -39,5 +39,10 @@ METHOD_PREFIX = {
 	"dn" : "onCmd",
 }
 
+#: 协议配置缓存文件。用来记录自动生成协议的规则
+MESSAGE_CONFIG_CACHE_FILE = "${MODULE_PATH}/config-cache.json"
+
+CMD_OPTION_NAME = "protoType"
+
 def custom_init():
 	pass

@@ -21,7 +21,8 @@ def parse_config(path):
 	if not os.path.exists(path):
 		raise RuntimeError, "the configure file '%s' doesn't exist" % path
 
-	sys.path.insert(0, os.path.dirname(path))
+	module_path = os.path.dirname(path)
+	sys.path.insert(0, module_path)
 
 	cfg = imp.load_source("custom_configure", path)
 	for k, v in cfg.__dict__.iteritems():
@@ -29,6 +30,7 @@ def parse_config(path):
 
 		setattr(ppconfig, k, v)
 
+	ppconfig.MODULE_PATH = module_path
 	ppconfig.custom_init()
 	return
 
@@ -46,6 +48,9 @@ def main():
 
 	ppconfig.INPUT_PATH = option.input_path
 	ppconfig.OUTPUT_PATH = option.output if option.output else "output"
+
+	if not hasattr(ppconfig, "MODULE_PATH"):
+		ppconfig.MODULE_PATH = ppconfig.OUTPUT_PATH
 
 	exporter = Exporter()
 	try:
