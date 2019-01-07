@@ -225,12 +225,12 @@ class Module(object):
 		return self.configCache.setdefault(name, {})
 
 	def loadConfigCache(self, filePath):
-		try:
-			with open(filePath, "r") as f:
-				self.configCache = json.load(f)
-		except Exception, e:
-			print e
+		if not os.path.exists(filePath):
 			self.configCache = {}
+			return
+
+		with open(filePath, "r") as f:
+			self.configCache = json.load(f)
 
 	def saveConfigCache(self, filePath):
 		with open(filePath, "w") as f:
