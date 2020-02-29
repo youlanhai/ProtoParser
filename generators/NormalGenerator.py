@@ -89,13 +89,19 @@ class NormalGenerator(Generator):
 
 		fmt = None
 		if attr.get("expand", True):
-			fmt = self.template.EXPAND_METHOD
+			fmt = getattr(self.template, "EXPAND_METHOD", None)
 		else:
-			fmt = self.template.COLLAPSED_METHOD
+			fmt = getattr(self.template, "COLLAPSED_METHOD", None)
 
-		tpl = Template(fmt, searchList = [namespace, self, self.template])
-		self.stream.write(str(tpl))
+		if fmt:
+			tpl = Template(fmt, searchList = [namespace, self, self.template])
+			self.stream.write(str(tpl))
 
+		fmt = getattr(self.template, "CODE", None)
+		if fmt:
+			tpl = Template(fmt, searchList = [namespace, self, self.template])
+			self.stream.write(str(tpl))
+		return
 
 	def writeHeader(self):
 		fmt = getattr(self.template, "HEADER", None)
