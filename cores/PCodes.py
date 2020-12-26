@@ -37,7 +37,7 @@ class IType(object):
 
 	def addType(self, tp):
 		if tp in self.types:
-			raise TypeError, "type '%s' has been exist" % tp.name
+			raise TypeError("type '%s' has been exist" % tp.name)
 		self.types[tp.name] = tp
 		self.codes.append(tp)
 
@@ -255,7 +255,7 @@ class Attribute(object):
 		''' 添加值属性。会根据索引位置，自动转换成键-值对格式
 		'''
 		if self.index >= len(ATTR_KEYS):
-			raise ValueError, "invliad attribute: %s" % str(value)
+			raise ValueError("invliad attribute: %s" % str(value))
 
 		# 如果未指定协议号，则自动生成
 		if self.index == 1 and isinstance(value, str):

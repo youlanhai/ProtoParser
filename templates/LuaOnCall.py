@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from LuaCommon import genOnName
+from .LuaCommon import genOnName
 
 HEADER = """--
 -- this file is auto generate by ProtoParser tool.

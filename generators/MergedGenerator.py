@@ -3,7 +3,7 @@ import os
 import re
 from Cheetah.Template import Template
 
-from NormalGenerator import NormalGenerator
+from .NormalGenerator import NormalGenerator
 
 class MergedGenerator(NormalGenerator):
 	''' 合并模式的代码生成器，针对整个模块，将结果合并输出到一个文件中
@@ -11,7 +11,7 @@ class MergedGenerator(NormalGenerator):
 
 	def collectCodes(self, module):
 		codes = []
-		for fileDescriptor in module.files.itervalues():
+		for fileDescriptor in module.files.values():
 			codes.extend(fileDescriptor.codes)
 		return codes
 
@@ -22,7 +22,7 @@ class MergedGenerator(NormalGenerator):
 			self.stream = f
 
 			self.writeHeader()
-			keys = module.files.keys()
+			keys = list(module.files.keys())
 			keys.sort()
 			for key in keys:
 				self.fileDescriptor = module.files[key]

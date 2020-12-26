@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from Cheetah.Template import Template
-from Generator import Generator
+from .Generator import Generator
 
 class PackageGenerator(Generator):
 	''' 每个文件对应的包名
@@ -9,7 +9,7 @@ class PackageGenerator(Generator):
 
 	def generate(self, inputPath, outputPath, module):
 		packages = []
-		for fname, fd in module.files.iteritems():
+		for fname, fd in module.files.items():
 			packageName = fd.packageName
 			if packageName is None: continue
 

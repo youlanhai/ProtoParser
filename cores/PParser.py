@@ -1,8 +1,8 @@
 #-*- coding: utf-8 -*-
 import os
-import PCodes
-import PLexer
-from PLexer import token2str, is_keyword_token, ProtoException
+from . import PCodes
+from . import PLexer
+from .PLexer import token2str, is_keyword_token, ProtoException
 
 VALID_VALUE_TOKENS = (
 	PLexer.T_IDENTITY,
@@ -65,7 +65,7 @@ class PParser(object):
 		return self.aheadTokenInfo.token
 
 	def parse(self):
-		print "parse:", self.fd.fileName
+		print("parse:", self.fd.fileName)
 
 		with open(self.fd.fullPath, "r") as f:
 			self.lexer = PLexer.PLexer(f.read(), self.fd.fileName)
@@ -385,7 +385,7 @@ class PParser(object):
 	def error(self, desc, msg):
 		msg = "error: file '%s', line=%d, column=%d, %s: %s" % (
 			self.fd.fileName, self.tokenInfo.line, self.tokenInfo.column, desc, msg)
-		raise ProtoException, msg
+		raise ProtoException(msg)
 
 	#属性 [mode, cmd, method, tag=value, ...]
 	def parse_attribute(self, parent = None):

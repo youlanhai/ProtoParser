@@ -45,12 +45,12 @@ KEYWORDS = {
 	"map"		: T_MAP,
 }
 
-KEYWORD_TOKENS = set([tk for tk in KEYWORDS.itervalues()])
+KEYWORD_TOKENS = set([tk for tk in KEYWORDS.values()])
 
 VAR_NAME_LETTER = string.letters + string.digits + '_'
 VAR_NAME_PATTERN = re.compile(r"^[_a-zA-Z]\w*$")
 
-TOKEN_2_NAME = {key : val for val, key in KEYWORDS.iteritems()}
+TOKEN_2_NAME = {key : val for val, key in KEYWORDS.items()}
 TOKEN_2_NAME.update({
 	T_IDENTITY 	: "identity",
 	T_ATTRIBUTE : "attribute",
@@ -259,7 +259,7 @@ class PLexer(object):
 	def error(self, msg):
 		self.isError = True
 		msg = "error: file '%s', line=%d, column=%d, %s" % (self.fileName, self.line, self.column, msg)
-		raise ProtoException, msg
+		raise ProtoException(msg)
 
 	def readNumber(self):
 		ret = []

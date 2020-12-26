@@ -8,7 +8,7 @@ from cores.PLexer import ProtoException
 try:
 	import Cheetah
 except:
-	print "Python module 'Cheetah' was required. use command `pip install Cheetah` to install it."
+	print("Python module 'Cheetah' was required. use command `pip install Cheetah` to install it.")
 	exit()
 
 import ppconfig
@@ -16,16 +16,16 @@ from Exporter import Exporter
 
 def parse_config(path):
 	path = os.path.abspath(path)
-	print "load configure file", path
+	print("load configure file", path)
 
 	if not os.path.exists(path):
-		raise RuntimeError, "the configure file '%s' doesn't exist" % path
+		raise RuntimeError("the configure file '%s' doesn't exist" % path)
 
 	module_path = os.path.dirname(path)
 	sys.path.insert(0, module_path)
 
 	cfg = imp.load_source("custom_configure", path)
-	for k, v in cfg.__dict__.iteritems():
+	for k, v in cfg.__dict__.items():
 		if k.startswith('_'): continue
 
 		setattr(ppconfig, k, v)
@@ -55,8 +55,8 @@ def main():
 	exporter = Exporter()
 	try:
 		exporter.run(option)
-	except ProtoException, msg:
-		print "\n**%s\n" % msg
+	except ProtoException as msg:
+		print("\n**%s\n" % msg)
 
 if __name__ == "__main__":
 	main()

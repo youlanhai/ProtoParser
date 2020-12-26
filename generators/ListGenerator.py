@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from Cheetah.Template import Template
-from Generator import Generator
+from .Generator import Generator
 
 class ListGenerator(Generator):
 	''' 消息文件列表生成器。用于调试目的
@@ -15,7 +15,7 @@ class ListGenerator(Generator):
 		with open(outputFile, "wb") as f:
 			self.stream = f
 
-			for fileDesc in module.files.itervalues():
+			for fileDesc in module.files.values():
 				self.collectMessages(ret, fileDesc)
 
 			self.writeMessageList(ret)

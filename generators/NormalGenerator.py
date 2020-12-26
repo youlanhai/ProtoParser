@@ -3,7 +3,7 @@ import os
 import re
 from Cheetah.Template import Template
 
-from Generator import Generator
+from .Generator import Generator
 
 class NormalGenerator(Generator):
 	''' 通用代码生成器，针对单个输入文件，输出一个生成后的文件
