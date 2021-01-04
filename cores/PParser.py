@@ -67,7 +67,7 @@ class PParser(object):
 	def parse(self):
 		print("parse:", self.fd.fileName)
 
-		with open(self.fd.fullPath, "r") as f:
+		with open(self.fd.fullPath, "r", encoding = "utf-8") as f:
 			self.lexer = PLexer.PLexer(f.read(), self.fd.fileName)
 
 		tokenHandler = {

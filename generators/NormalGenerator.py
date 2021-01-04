@@ -27,7 +27,7 @@ class NormalGenerator(Generator):
 		# if fileDescriptor.packageName:
 		# 	self.packagePrefix = fileDescriptor.packageName + "."
 
-		with open(outputPath, "wb") as f:
+		with open(outputPath, "w", newline="\n") as f:
 			self.stream = f
 
 			self.writeHeader()

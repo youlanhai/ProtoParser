@@ -233,7 +233,7 @@ class Module(object):
 			self.configCache = json.load(f)
 
 	def saveConfigCache(self, filePath):
-		with open(filePath, "w") as f:
+		with open(filePath, "w", newline="\n") as f:
 			json.dump(self.configCache, f, indent = 4, sort_keys = True)
 
 
