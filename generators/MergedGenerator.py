@@ -18,7 +18,7 @@ class MergedGenerator(NormalGenerator):
 	def generate(self, inputPath, outputPath, module):
 		self.inputPath = inputPath
 
-		with open(outputPath, "w", newline="\n") as f:
+		with open(outputPath, "w", encoding="utf-8", newline="\n") as f:
 			self.stream = f
 
 			self.writeHeader()

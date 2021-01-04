@@ -12,7 +12,7 @@ class ListGenerator(Generator):
 		self.moduleName = os.path.splitext(os.path.basename(inputFile))[0]
 
 		ret = []
-		with open(outputFile, "w", newline="\n") as f:
+		with open(outputFile, "w", encoding="utf-8", newline="\n") as f:
 			self.stream = f
 
 			for fileDesc in module.files.values():

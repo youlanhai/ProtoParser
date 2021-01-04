@@ -23,7 +23,7 @@ class PackageGenerator(Generator):
 		fmt = self.template.TEMPLATE
 		tpl = Template(fmt, searchList = [namespace, self])
 
-		with open(outputPath, "w", newline="\n") as f:
+		with open(outputPath, "w", encoding="utf-8", newline="\n") as f:
 			f.write(str(tpl))
 
 		return
